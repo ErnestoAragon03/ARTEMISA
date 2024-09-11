@@ -21,26 +21,29 @@ rec = vosk.KaldiRecognizer(model, samplerata)
 recognized_text =""
 
 
+try:
 
-print(sd.query_devices())
-# Función de callback para el flujo de audio
-def callback(indata, frames, time, status):
-    global recognized_text
-    if status:
-        print(status, flush=True, file=sys.stderr)
-    
-    if rec.AcceptWaveform(indata.tobytes()):
-        result = json.loads(rec.Result())
-        recognized_text = result.get('text', '')
-        print("Texto reconocido:", result.get('text', ''))
-    else:
-        print(rec.PartialResult())
+    print(sd.query_devices())
+    # Función de callback para el flujo de audio
+    def callback(indata, frames, time, status):
+        global recognized_text
+        if status:
+            print(status, flush=True, file=sys.stderr)
+        
+        if rec.AcceptWaveform(indata.tobytes()):
+            result = json.loads(rec.Result())
+            recognized_text = result.get('text', '')
+            print("Texto reconocido:", result.get('text', ''))
+        else:
+            print(rec.PartialResult())
 
-#Selecciona el dispositivo de entrada (device) Si no se especifica usa el default que tiene el sistema
-#device_id = 10
+    #Selecciona el dispositivo de entrada (device) Si no se especifica usa el default que tiene el sistema
+    #device_id = 10
 
-# Iniciar la captura de audio
-with sd.InputStream(samplerate=samplerata, blocksize = blocksize, dtype=dtype, channels=1, callback=callback):
-    print("Escuchando... Ctr+C para detener")
-    while True:
-        pass
+    # Iniciar la captura de audio
+    with sd.InputStream(samplerate=samplerata, blocksize = blocksize, dtype=dtype, channels=1, callback=callback):
+        print("Escuchando... Ctr+C para detener")
+        while True:
+            pass
+except KeyboardInterrupt:
+    print("\nDone")
