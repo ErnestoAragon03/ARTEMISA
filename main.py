@@ -18,7 +18,7 @@ def main():
 
 def process_text(recognized_text):
     #Procesamiento con LLM
-    initial_context = """El proyecto ARTEMISA es un asistente que utiliza modelos de lenguaje para responder a preguntas  
+    initial_context = """El proyecto ARTEMISA es un asistente que utiliza modelos de lenguaje para responder a preguntas y ayudar al mundo  
     Yo soy el proyecto ARTEMISA
     Mi nombre es Rebecca
     Usuario Actual: Aragón
