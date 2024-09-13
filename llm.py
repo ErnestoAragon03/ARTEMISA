@@ -1,15 +1,13 @@
-#from transformers import GPT2LMHeadModel, GPT2Tokenizer #Para GPT2
-from transformers import T5Tokenizer, T5ForConditionalGeneration
 from transformers import AutoTokenizer, AutoModelForQuestionAnswering
 import torch
 
 #Inicializar el modelo (Flan-T5) y el tokenizer
 def initialize_llm():
-    #model_name = "google/flan-t5-large" #Aquí se define el nombre del modelo que se usará
-    model_name = "mrm8488/distill-bert-base-spanish-wwm-cased-finetuned-spa-squad2-es"
-    #tokenizer = T5Tokenizer.from_pretrained(model_name)
-    #model = T5ForConditionalGeneration.from_pretrained(model_name)
+    #Definir el nombre del modelo que se usará
+    model_name = "mrm8488/distill-bert-base-spanish-wwm-cased-finetuned-spa-squad2-es" 
+    #Inicializar tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_name)
+    #Inicializar modelo
     model = AutoModelForQuestionAnswering.from_pretrained(model_name)
     return model, tokenizer
 
