@@ -16,3 +16,9 @@ __pycache__/
 
 #Ignorar recursos de documentación e información
 Recursos/
+
+#Ignorar archivos de tipo zip
+*.zip
+
+#Ignorar archivos específicos
+Wake_Words/LICENSE.txt
