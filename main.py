@@ -1,6 +1,7 @@
 import asr  # Módulo ASR
 from llm import initialize_llm, generate_response  # Módulo LLM
 from tts import initialize_tts, generate_audio     # Módulo TTS
+import wake_up  #Módulo de wake words
 
 def main():
     global llm_model, llm_tokenizer, tts_model
@@ -8,6 +9,9 @@ def main():
     llm_model, llm_tokenizer = initialize_llm()
     #Inicializar el modelo TTS 
     tts_model = initialize_tts()
+
+    #Esperar wake word
+    wake_up.recognize_wake_word()
 
     #Iniciar el ASR en un hilo separado
     asr.start_asr_local()   #QUIZÁS REQUIERA DEL USO DE HILOS EN PARALELO   
@@ -18,16 +22,17 @@ def main():
         llm_response = process_text(asr.recognized_text)
         #Enviar a TTS
         process_response(llm_response)
-        asr.recognized_text = ""  #Reiniciar despúes de procesar el texto
+    asr.recognized_text = ""  #Reiniciar despúes de procesar el texto
+    main()
             
 
 def process_text(recognized_text):
     #Procesamiento con LLM
-    initial_context = """El proyecto ARTEMISA es un asistente que utiliza modelos de lenguaje para responder a preguntas y ayudar al mundo  
+    initial_context = """El proyecto ARTEMISA es un asistente que utiliza modelos de lenguaje para responder a preguntas  
     Yo soy el proyecto ARTEMISA
     Nombres: Rebecca
     Usuario Actual: Aragón
-    Información: Aragón es el creador del proyecto ARTEMISA"""
+    Información: Aragón es el usuario actual"""
     response = generate_response(recognized_text, initial_context, llm_model, llm_tokenizer)
     print(f"Respuesta del LLM: {response}")
     return response
