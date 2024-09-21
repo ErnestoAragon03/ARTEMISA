@@ -36,13 +36,14 @@ detection_cooldown = 0.5    #Umbral para evitar repetir palabras
 
 #Variable donde almacenar el texto transcrito por Vosk
 recognized_text =""
+conversation_active = False
 
 
 def is_speech(frame):
     return vad.is_speech(frame, samplerate)
 
 def start_asr_local():
-    global recognized_text
+    global recognized_text, conversation_active
     
     #Cola para almacenar los datos de audio
     audio_queue = queue.Queue()
@@ -86,6 +87,7 @@ def start_asr_local():
                 print(f"Escuchando: {recognized_text+partial_text}")
     #Resultado final
     print(f"Texto final reconocido: {recognized_text}")
+    conversation_active = True
 """
         audio_data = indata.flatten()
         #Verificar si hay voz en cada frame

@@ -9,20 +9,24 @@ def main():
     llm_model, llm_tokenizer = initialize_llm()
     #Inicializar el modelo TTS 
     tts_model = initialize_tts()
-
-    #Esperar wake word
-    wake_up.recognize_wake_word()
-
-    #Iniciar el ASR en un hilo separado
-    asr.start_asr_local()   #QUIZÁS REQUIERA DEL USO DE HILOS EN PARALELO   
-  
+    if asr.conversation_active:
+         #Iniciar el ASR en un hilo separado
+        asr.start_asr_local()   #QUIZÁS REQUIERA DEL USO DE HILOS EN PARALELO
+    else:
+        #Esperar wake word
+        wake_up.recognize_wake_word()
+        #Iniciar el ASR en un hilo separado
+        asr.start_asr_local()
+        
     if asr.recognized_text:  #Si se ha detectado texto...
         print(f"Texto detectado: {asr.recognized_text}")
         #Enciar a LLM
         llm_response = process_text(asr.recognized_text)
         #Enviar a TTS
         process_response(llm_response)
-    asr.recognized_text = ""  #Reiniciar despúes de procesar el texto
+        asr.recognized_text = ""  #Reiniciar despúes de procesar el texto
+    else:
+        asr.conversation_active = False
     main()
             
 
