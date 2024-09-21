@@ -1,4 +1,5 @@
 import sounddevice as sd
+import soundfile as sf
 import vosk
 import json
 import sys  # Importa la librería sys
@@ -13,6 +14,9 @@ import queue
 #Path hacia la ubicación del modelo Vosk (Modificar más adelante para evitar problemas de compatibilidad)
 model_path = r"C:\Users\Ernesto\Documents\Proyecto ARTEMISA\ASR\Local\Model\vosk-model-small-es-0.42"
 
+#Path hacia efectos de sonido
+activation_sound_path = "./ASR/SoundEffects/beep.mp3"
+
 #Parámetros del audio
 samplerate = 16000  #Frecuencia de muestreo (Depende del micrófono)
 blocksize = 8000     #Tamaño de los bloques de procesamiento
@@ -26,7 +30,7 @@ rec = vosk.KaldiRecognizer(model, samplerate)
 
 #Configuración detección de actividad vocal (VAD)
 vad = webrtcvad.Vad(1)  #1 indica modo de detección normal
-silence_threshold = 3 # Segundos de inactividad que esperará el modelo
+silence_threshold = 2 # Segundos de inactividad que esperará el modelo
 
 #Iniciar los tiempos de espera
 last_voice_time = time.time()
@@ -38,9 +42,14 @@ detection_cooldown = 0.5    #Umbral para evitar repetir palabras
 recognized_text =""
 conversation_active = False
 
-
-def is_speech(frame):
-    return vad.is_speech(frame, samplerate)
+def play_activation_sound():
+    "Reproduce un sonido cuando se activa el ASR"
+    try:
+        data, samplerate = sf.read(activation_sound_path)
+        sd.play(data, samplerate)
+        sd.wait()
+    except Exception as e:
+        print(f"Error al reproducir sonido: {e}")
 
 def start_asr_local():
     global recognized_text, conversation_active
@@ -48,6 +57,7 @@ def start_asr_local():
     #Cola para almacenar los datos de audio
     audio_queue = queue.Queue()
 
+    play_activation_sound()
     #print(sd.query_devices())       #Imprime la lista de todos los dispositivos conectados a la computadora
     # Función de callback para el flujo de audio
     def callback(indata, frames, callback_time, status):
