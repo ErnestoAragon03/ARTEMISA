@@ -15,7 +15,8 @@ import queue
 model_path = r"C:\Users\Ernesto\Documents\Proyecto ARTEMISA\ASR\Local\Model\vosk-model-small-es-0.42"
 
 #Path hacia efectos de sonido
-activation_sound_path = "./ASR/SoundEffects/beep.mp3"
+activation_sound_path = "./ASR/SoundEffects/start_beep.mp3"
+deactivation_sound_path = "./ASR/SoundEffects/stop_beep.mp3"
 
 #Parámetros del audio
 samplerate = 16000  #Frecuencia de muestreo (Depende del micrófono)
@@ -43,9 +44,18 @@ recognized_text =""
 conversation_active = False
 
 def play_activation_sound():
-    "Reproduce un sonido cuando se activa el ASR"
+    #Reproduce un sonido cuando se activa el ASR
     try:
         data, samplerate = sf.read(activation_sound_path)
+        sd.play(data, samplerate)
+        sd.wait()
+    except Exception as e:
+        print(f"Error al reproducir sonido: {e}")
+
+def play_deactivation_sound():
+    #Reproduce un sonido cuando se desactiva el ASR
+    try:
+        data, samplerate = sf.read(deactivation_sound_path)
         sd.play(data, samplerate)
         sd.wait()
     except Exception as e:
@@ -98,56 +108,4 @@ def start_asr_local():
     #Resultado final
     print(f"Texto final reconocido: {recognized_text}")
     conversation_active = True
-"""
-        audio_data = indata.flatten()
-        #Verificar si hay voz en cada frame
-        for start in range(0, len(audio_data), frame_size):
-            frame = audio_data[start:start + frame_size]
-
-            if len(frame) < frame_size:
-                #Ignorar frames muy pequeños
-                continue
-                    
-            current_time =time.time()
-
-            if is_speech(frame.tobytes()):
-                #Evitar detecciones múltiples
-                if current_time - last_detection_time > detection_cooldown:
-                    print("Detectando voz...")
-                    last_detection_time = current_time
-                        
-                if rec.AcceptWaveform(indata.tobytes()):
-                    result = json.loads(rec.Result())
-                    recognized_text= result.get('text', '')
-                    print("Texto reconocido:", result.get('text', ''))
-
-                last_voice_time = current_time
-
-        if time.time() - last_voice_time > silence_threshold:
-                    print("Usuario terminó de hablar")
-                    stop_listening()
-
-    def stop_listening():
-        global is_listening 
-        is_listening = False #Marcar que la escucha ha terminado
-        print("Terminando la grabación...")
-        print(recognized_text)
-        sd.stop()
-
-    #Selecciona el dispositivo de entrada (device) Si no se especifica usa el default que tiene el sistema
-    #device_id = 10
-    def start_listening():
-        global is_listening
-        is_listening = True
-        print("Escuchando... Ctr+C para detener")
-        # Iniciar la captura de audio
-        with sd.InputStream(samplerate=samplerate, blocksize = blocksize, dtype=dtype, channels=1, callback=callback):
-            while is_listening:
-                sd.sleep(100)
-                
-    start_listening()
-
-except KeyboardInterrupt:
-    print("\nDone")
-except Exception as e:
-    print(f"Error inicializando InputStream: {e}")"""
+    play_deactivation_sound()
