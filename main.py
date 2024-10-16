@@ -2,9 +2,10 @@ import asr  # Módulo ASR
 from llm import initialize_llm, generate_response  # Módulo LLM
 from tts import initialize_tts, generate_audio     # Módulo TTS
 import wake_up  #Módulo de wake words
+import local_db #Módulo de la base de datos local
 
 def main():
-    global llm_model, llm_tokenizer, tts_model
+    global llm_model, llm_tokenizer, tts_model, context
     #Inicializar el modelo LLM Flant-T5
     llm_model, llm_tokenizer = initialize_llm()
     #Inicializar el modelo TTS 
@@ -37,8 +38,9 @@ def process_text(recognized_text):
     Nombres: Rebecca
     Usuario Actual: Aragón
     Información: Aragón es el usuario actual"""
-    response = generate_response(recognized_text, initial_context, llm_model, llm_tokenizer)
+    response, context = generate_response(recognized_text, initial_context, llm_model, llm_tokenizer)
     print(f"Respuesta del LLM: {response}")
+    print(f"Contexto: {context}")
     return response
 
 def process_response(llm_response):
@@ -49,4 +51,5 @@ def process_response(llm_response):
 
 
 if __name__ == "__main__":
+    local_db.init_db()
     main()

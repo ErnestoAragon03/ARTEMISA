@@ -14,7 +14,7 @@ def initialize_tts():
 #Función para generar el audio
 def generate_audio(input_text,tts):
     #Generar el audio
-    audio = tts.tts(input_text, speed=3)
+    audio = tts.tts(input_text, speed=5)
     #Convertir la lista de audio a un array de numpy
     np_audio = np.array(audio)
     #Normalizar la señal para darle un sonido más natural
