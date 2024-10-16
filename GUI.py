@@ -1,7 +1,11 @@
 import tkinter as tk
 from tkinter import messagebox
+from threading import Thread
+import time
+import main
 
 class Application:
+    mic_active = True
     def __init__(self, ventana):
         #Configuración de Ventana
         self.ventana = ventana
@@ -11,6 +15,8 @@ class Application:
         self.ventana.geometry("%dx%d" % (width, height))
         
         #Botón ASR
+        self.mic_button = tk.Button(ventana, text="Desactivar Micrófono", command= self.toggle_mic)
+        self.mic_button.grid(row=1, column = 4)
         
         #Campo para mostrar respuesta del LLM
         #self.transcription = tk.Text(ventana, height=5, width=60)
@@ -41,6 +47,17 @@ class Application:
         else:
             messagebox.showwarning("Advertencia", f"Por favor ingrese su nombre")
         print("Hola")
+        
+
+    def toggle_mic(self):
+        global mic_active
+        if not mic_active:
+            mic_active = True
+            mic_button.config(text="Desactivar Microfono")
+            #Thread(target=start_asr).start()
+        else:
+            mic_active = False
+            mic_button.config(text="Activar Microfono")
 
 if __name__ == "__main__":
     ventana = tk.Tk()

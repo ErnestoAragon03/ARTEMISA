@@ -3,6 +3,7 @@ from llm import initialize_llm, generate_response  # Módulo LLM
 from tts import initialize_tts, generate_audio     # Módulo TTS
 import wake_up  #Módulo de wake words
 import local_db #Módulo de la base de datos local
+import GUI  #Interfaz gráfica
 
 def main():
     global llm_model, llm_tokenizer, tts_model, context
@@ -10,10 +11,14 @@ def main():
     llm_model, llm_tokenizer = initialize_llm()
     #Inicializar el modelo TTS 
     tts_model = initialize_tts()
-    if asr.conversation_active:
+    if asr.conversation_active & GUI.mic_active:
          #Iniciar el ASR en un hilo separado
         asr.start_asr_local()   #QUIZÁS REQUIERA DEL USO DE HILOS EN PARALELO
     else:
+        #Esperar a que se active el microfono ESTO SE TIENE QUE CAMBIAR, MUY INEFICIENTE
+        while not GUI.mic_active:
+            #NO hacer nada
+            nop
         #Esperar wake word
         wake_up.recognize_wake_word()
         #Iniciar el ASR en un hilo separado
