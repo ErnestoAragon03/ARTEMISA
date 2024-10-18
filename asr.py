@@ -35,7 +35,7 @@ silence_threshold = 2 # Segundos de inactividad que esperará el modelo
 
 #Iniciar los tiempos de espera
 last_voice_time = time.time()
-is_listening = True
+listening = True
 last_detection_time = 0
 detection_cooldown = 0.5    #Umbral para evitar repetir palabras
 

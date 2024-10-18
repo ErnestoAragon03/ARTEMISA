@@ -4,18 +4,19 @@ from threading import Thread
 import time
 import main
 
+mic_active = True
+
 class Application:
-    mic_active = True
-    def __init__(self, ventana):
+    def __init__(self, root):
         #Configuración de Ventana
-        self.ventana = ventana
-        self.ventana.title("Artemisa")
-        width = ventana.winfo_screenwidth()
-        height = ventana.winfo_screenheight()
-        self.ventana.geometry("%dx%d" % (width, height))
+        self.root = root
+        self.root.title("Artemisa")
+        width = root.winfo_screenwidth()
+        height = root.winfo_screenheight()
+        self.root.geometry("%dx%d" % (width, height))
         
         #Botón ASR
-        self.mic_button = tk.Button(ventana, text="Desactivar Micrófono", command= self.toggle_mic)
+        self.mic_button = tk.Button(root, text="Desactivar Micrófono", command= self.toggle_mic)
         self.mic_button.grid(row=1, column = 4)
         
         #Campo para mostrar respuesta del LLM
@@ -29,15 +30,15 @@ class Application:
 
 
         #Etiqueta
-        self.etiqueta = tk.Label(ventana, text="Ingrese su nombre: ")
+        self.etiqueta = tk.Label(root, text="Ingrese su nombre: ")
         self.etiqueta.grid(row=0,column=0)
 
         #Input
-        self.input_nombre = tk.Entry(ventana)
+        self.input_nombre = tk.Entry(root)
         self.input_nombre.grid(row=0,column=1)
 
         #Botón
-        self.boton_saludo = tk.Button(ventana, text="Saludar", command = self.saludar)
+        self.boton_saludo = tk.Button(root, text="Saludar", command = self.saludar)
         self.boton_saludo.grid(row=0,column=3)
 
     def saludar(self):
@@ -51,15 +52,28 @@ class Application:
 
     def toggle_mic(self):
         global mic_active
-        if not mic_active:
-            mic_active = True
-            mic_button.config(text="Desactivar Microfono")
-            #Thread(target=start_asr).start()
-        else:
+        if mic_active:
             mic_active = False
-            mic_button.config(text="Activar Microfono")
+            main.running = False
+            self.mic_button.config(text="Activar Microfono")
+            #Detener el thread
+            if pipeline_thread and pipeline_thread.is_alive():
+                ###AQUÍ ESTÁ EL ERROR
+                pipeline_thread.join()  #Esperar a que termine el thread
+                print("muting...")
+        else:
+            mic_active = True
+            main.running = True
+            self.mic_button.config(text="Desactivar Microfono")
+            pipeline_thread = Thread(target=main.start_pipeline)
+            pipeline_thread.start()
+            #Thread(target=start_asr).start()
+            
 
 if __name__ == "__main__":
-    ventana = tk.Tk()
-    app = Application(ventana)
-    ventana.mainloop()
+    root = tk.Tk()
+    main.running = True
+    pipeline_thread = Thread(target=main.start_pipeline)
+    pipeline_thread.start()
+    app = Application(root)
+    root.mainloop()
