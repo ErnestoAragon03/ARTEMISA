@@ -17,13 +17,17 @@ class Application:
         
         self.pipeline_thread = None
         self.start_pipeline()
-        #Botón ASR
-        self.mic_button = tk.Button(root, text="Desactivar Micrófono", command= self.toggle_mic)
-        self.mic_button.grid(row=1, column = 4)
         
-        #Campo para mostrar respuesta del LLM
-        #self.transcription = tk.Text(ventana, height=5, width=60)
-        #self.transcription.pack(pady=5)
+        ###Campo para mostrar Transcripciones###
+        self.transcription_area = tk.Text(root, height=15, width=50, state=tk.DISABLED, wrap=tk.WORD)
+        self.transcription_area.grid(row=1, column=10)
+        ##Estilos del texto##
+        self.transcription_area.tag_configure("user", foreground="blue", justify='right')   #Transcripción del usuario
+        self.transcription_area.tag_configure("assistant", foreground="green", justify='left')  #Respuesta del Asistente
+
+        ###Botón ASR###
+        self.mic_button = tk.Button(root, text="Desactivar Micrófono", command= self.toggle_mic)
+        self.mic_button.grid(row=6, column = 10)
 
         #Botón para enviar al LLM
         #self.boton_enviar_llm = tk.Button(ventana, text="Enviar", command=self.enviar_llm)
@@ -43,13 +47,13 @@ class Application:
         #self.boton_saludo = tk.Button(root, text="Saludar", command = self.saludar)
         #self.boton_saludo.grid(row=0,column=3)
 
-        #Vincular el cierre de la ventana con la función on_closing (para terminar todos los procesos)
+        ###Vincular el cierre de la ventana con la función on_closing (para terminar todos los procesos)
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     ###Función para iniciar el pipeline###
     def start_pipeline(self):
         main.running = True
-        pipeline_thread = Thread(target=main.start_pipeline)
+        pipeline_thread = Thread(target= lambda: main.start_pipeline(self))
         pipeline_thread.start()
     
     ###Función para terminar el pipeline###
@@ -70,6 +74,15 @@ class Application:
             mic_active = True
             self.mic_button.config(text="Desactivar Microfono")
             self.start_pipeline()
+    
+    ###Función de Transcripción###
+    def transcribe(self, text, speaker):
+        self.transcription_area.config(state=tk.NORMAL) #Habilita la edición del text Widget
+        if speaker == 'user':
+            self.transcription_area.insert(tk.END, f"{text}\n", "user")    #Transcipción de lado del usuario
+        elif speaker=='assistant':
+            self.transcription_area.insert(tk.END, f"{text}\n", "assistant")    #Transcipción de lado del asistente
+        self.transcription_area.config(state=tk.DISABLED)
     
     ###Función para manejar el cierre de ventana###
     def on_closing(self):

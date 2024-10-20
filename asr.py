@@ -6,6 +6,7 @@ import sys  # Importa la librería sys
 import webrtcvad
 import time
 import queue
+import GUI
 
 # Configura el modelo y el reconocimiento
 #laptop_DELL = "C:\User\ernes\OneDrive\Documentos\Proyecto ARTEMISA\ASR\Local\Model\vosk-model-small-es-0.42"
@@ -61,7 +62,7 @@ def play_deactivation_sound():
     except Exception as e:
         print(f"Error al reproducir sonido: {e}")
 
-def start_asr_local():
+def start_asr_local(app_instance):
     global recognized_text, conversation_active
     
     #Cola para almacenar los datos de audio
@@ -107,5 +108,7 @@ def start_asr_local():
                 print(f"Escuchando: {recognized_text+partial_text}")
     #Resultado final
     print(f"Texto final reconocido: {recognized_text}")
-    conversation_active = True
+    if recognized_text:
+        app_instance.transcribe(text=recognized_text, speaker='user')     #Pasa el texto capturado a la interfaz gráfica
+    conversation_active = True  
     play_deactivation_sound()
