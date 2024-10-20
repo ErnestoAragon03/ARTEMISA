@@ -31,11 +31,11 @@ rec = vosk.KaldiRecognizer(model, samplerate)
 
 #Configuración detección de actividad vocal (VAD)
 vad = webrtcvad.Vad(1)  #1 indica modo de detección normal
-silence_threshold = 2 # Segundos de inactividad que esperará el modelo
+silence_threshold = 1 # Segundos de inactividad que esperará el modelo
 
 #Iniciar los tiempos de espera
 last_voice_time = time.time()
-listening = True
+is_listening = True
 last_detection_time = 0
 detection_cooldown = 0.5    #Umbral para evitar repetir palabras
 

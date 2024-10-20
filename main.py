@@ -24,16 +24,18 @@ def main():
         if awaked:
             asr.start_asr_local()
         
-    if asr.recognized_text:  #Si se ha detectado texto...
-        print(f"Texto detectado: {asr.recognized_text}")
-        #Enciar a LLM
-        llm_response = process_text(asr.recognized_text)
-        #Enviar a TTS
-        process_response(llm_response)
-        asr.recognized_text = ""  #Reiniciar despúes de procesar el texto
-    else:
-        asr.conversation_active = False
-    if running:
+    if  GUI.mic_active: #Si el microfono estaba activo al momento de llegar
+        if asr.recognized_text:  #Si se ha detectado texto...
+            print(f"Texto detectado: {asr.recognized_text}")
+            #Enciar a LLM
+            llm_response = process_text(asr.recognized_text)
+            #Enviar a TTS
+            process_response(llm_response)
+            asr.recognized_text = ""  #Reiniciar despúes de procesar el texto
+        else:
+            asr.conversation_active = False
+
+    if running:     #Si el hilo sigue corriendo repetir
         main()
     else:
         print("Terminando Pipeline")
