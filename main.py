@@ -43,15 +43,25 @@ def main(app_instance):
             
 
 def process_text(recognized_text):
-    #Procesamiento con LLM
-    initial_context = """El proyecto ARTEMISA es un asistente que utiliza modelos de lenguaje para responder a preguntas  
-    Yo soy el proyecto ARTEMISA
-    Nombres: Rebecca
-    Usuario Actual: Aragón
-    Información: Aragón es el usuario actual"""
-    response, context = generate_response(recognized_text, initial_context, llm_model, llm_tokenizer)
-    print(f"Respuesta del LLM: {response}")
-    print(f"Contexto: {context}")
+    try:
+        #Procesamiento con LLM
+        initial_context = """El proyecto ARTEMISA es un asistente que utiliza modelos de lenguaje para responder a preguntas  
+        Yo soy el proyecto ARTEMISA
+        Nombres: Rebecca
+        Usuario Actual: Aragón
+        Información: Aragón es el usuario actual"""
+        response, context = generate_response(recognized_text, initial_context, llm_model, llm_tokenizer)
+        #Verificar que la respuesta no esté vacía
+        if not response or response.strip() == "" or response == '[CLS]':
+            raise ValueError("La respuesta del LLM está vacía")    
+        print(f"Respuesta del LLM: {response}")
+        print(f"Contexto: {context}")
+    except ValueError as ve:
+        print(f"Error en la respuesta del LLM: {ve}")
+        response = "Hubo un error en la respuesta, intentelo nuevamente"
+    except Exception as e: 
+        print(f"Ocurrió un error inesperado: {e}")
+        response = "Hubo un error inesperado, intentelo nuevamente"
     return response
 
 def process_response(llm_response):
