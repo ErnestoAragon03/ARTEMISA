@@ -28,8 +28,9 @@ def main(app_instance):
         if  GUI.mic_active: #Si el microfono estaba activo al momento de llegar
             if asr.recognized_text:  #Si se ha detectado texto...
                 print(f"Texto detectado: {asr.recognized_text}")
-                #Enciar a LLM
+                #Enviar a LLM
                 llm_response = process_text(asr.recognized_text)
+                app_instance.transcribe(text=llm_response, speaker='assistant')
                 #Enviar a TTS
                 process_response(llm_response)
                 asr.recognized_text = ""  #Reiniciar despúes de procesar el texto

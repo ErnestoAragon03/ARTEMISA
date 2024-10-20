@@ -76,11 +76,11 @@ class Application:
             self.start_pipeline()
     
     ###Función de Transcripción###
-    def trancribe(self, text, speaker):
+    def transcribe(self, text, speaker):
         self.transcription_area.config(state=tk.NORMAL) #Habilita la edición del text Widget
         if speaker == 'user':
             self.transcription_area.insert(tk.END, f"{text}\n", "user")    #Transcipción de lado del usuario
-        else:
+        elif speaker=='assistant':
             self.transcription_area.insert(tk.END, f"{text}\n", "assistant")    #Transcipción de lado del asistente
         self.transcription_area.config(state=tk.DISABLED)
     
