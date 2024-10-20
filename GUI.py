@@ -6,49 +6,52 @@ import main
 
 mic_active = True
 
-class Application:
-    def __init__(self, root):
+class Application(tk.Tk):
+    def __init__(self):
         #Configuración de Ventana
-        self.root = root
-        self.root.title("Artemisa")
-        width = root.winfo_screenwidth()
-        height = root.winfo_screenheight()
-        self.root.geometry("%dx%d" % (width, height))
+        super().__init__()
+        self.title("Artemisa")
+        width = self.winfo_screenwidth()
+        height = self.winfo_screenheight()
+        self.geometry("%dx%d" % (width, height))
         
         self.pipeline_thread = None
         self.start_pipeline()
         
         ###Campo para mostrar Transcripciones###
-        self.transcription_area = tk.Text(root, height=15, width=50, state=tk.DISABLED, wrap=tk.WORD)
-        self.transcription_area.grid(row=1, column=10)
-        ##Estilos del texto##
+        self.transcription_area = tk.Text(self, height=15, width=50, state=tk.DISABLED, wrap=tk.WORD)
+        self.transcription_area.pack(pady=10)
+        ###Estilos del texto##
         self.transcription_area.tag_configure("user", foreground="blue", justify='right')   #Transcripción del usuario
-        self.transcription_area.tag_configure("assistant", foreground="green", justify='left')  #Respuesta del Asistente
+        self.transcription_area.tag_configure("assigstant", foreground="green", justify='left')  #Respuesta del Asistente
 
+        ###Frame que contiene el input de texto, botón de enviar y silenciar###
+        botton_frame = tk.Frame(self)
+        botton_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=10)
+
+        ###Input de texto###
+        self.text_input = tk.Entry(botton_frame, width=40)
+        self.text_input.pack(side=tk.LEFT, padx=5, pady=5)
+        self.text_input.bind("<Return>", self.send_text)  #Vincular la tecla Enter para enviar el texto
+        ###Botón para enviar input de texto###
+        send_button = tk.Button(botton_frame, text="Enviar", command=self.send_text)
+        send_button.pack(side=tk.LEFT, padx=5)
         ###Botón ASR###
-        self.mic_button = tk.Button(root, text="Desactivar Micrófono", command= self.toggle_mic)
-        self.mic_button.grid(row=6, column = 10)
-
-        #Botón para enviar al LLM
-        #self.boton_enviar_llm = tk.Button(ventana, text="Enviar", command=self.enviar_llm)
-        #self.pack(pady=10)
-
-
-
-        #Etiqueta
-        #self.etiqueta = tk.Label(root, text="Ingrese su nombre: ")
-        #self.etiqueta.grid(row=0,column=0)
-
-        #Input
-        #self.input_nombre = tk.Entry(root)
-        #self.input_nombre.grid(row=0,column=1)
-
-        #Botón
-        #self.boton_saludo = tk.Button(root, text="Saludar", command = self.saludar)
-        #self.boton_saludo.grid(row=0,column=3)
+        self.mic_button = tk.Button(botton_frame, text="Desactivar Micrófono", command= self.toggle_mic)
+        self.mic_button.pack(side=tk.LEFT, padx=5)
 
         ###Vincular el cierre de la ventana con la función on_closing (para terminar todos los procesos)
-        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def send_text(self, event=None):
+        user_input = self.text_input.get()  #Obtener el texto ingresado
+        if user_input:      #Solo en caso el texto no esté vacío            
+            self.transcribe(text=user_input, speaker="user")    #Transcripción del usuario
+            self.text_input.delete(0, tk.END)   #Limpiar el input de texto
+
+            #Obtener respuesta del LLM
+            response = main.process_text(user_input)
+            self.transcribe(text=response, speaker="assistant") #Transcribir la respuesta del LLM
 
     ###Función para iniciar el pipeline###
     def start_pipeline(self):
@@ -87,10 +90,10 @@ class Application:
     ###Función para manejar el cierre de ventana###
     def on_closing(self):
         self.stop_pipeline()    #Detener el pipeline si es que está activo            
-        self.root.destroy()     #Cerrar la ventana
+        self.destroy()     #Cerrar la ventana
 
 ###Configuración inicial de la ventana###
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = Application(root)
-    root.mainloop()
+    #root = tk.Tk()
+    app = Application()
+    app.mainloop()
