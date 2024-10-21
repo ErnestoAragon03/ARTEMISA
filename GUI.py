@@ -3,6 +3,7 @@ from tkinter import messagebox
 from threading import Thread
 import time
 import main
+import local_db
 
 mic_active = True
 
@@ -155,10 +156,21 @@ class Application(tk.Tk):
         if hasattr(home_screen, 'stop_pipeline'):
             print("Deteniendo Pipeline actual")
             home_screen.stop_pipeline()
-                
+        ###Almacenar la sesión antes de cerrar###
+        local_db.update_session()
         self.destroy()     #Cerrar la ventana
+    
 
 ###Configuración inicial de la ventana###
 if __name__ == "__main__":
+    ###Confirmar creación de DB al iniciar la aplicación###
+    local_db.init_db()
+    ###Obtener el nombre de usuario y correo de la última cuenta activa, si es que hay una###
+    username, email = local_db.get_last_active_session()
+    if username:
+        print(f"Sesión iniciada en la cuenta {username}")
+    else:
+        print("Modo guest")
+
     app = Application()
     app.mainloop()

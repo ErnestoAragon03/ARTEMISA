@@ -20,16 +20,13 @@ def init_db():
                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                    username TEXT NOT NULL,
                    email TEXT NOT NULL UNIQUE,
-                   password TEXT NOT NULL
-                   session_active INTEGER DEFAULT 0
-                   )
-                    ''')
+                   password TEXT NOT NULL)''')
          
     #Crear tabla de sesiones activas
     cursor.execute('''CREATE TABLE IF NOT EXISTS session(
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id INTEGER
-                    FOREIGN KEY(user_id) REFERENCES local_users(id)
+                    user_email INTEGER,
+                    FOREIGN KEY(user_email) REFERENCES local_users(email)
                    )
                    ''')
     conn.commit()
@@ -63,3 +60,32 @@ def recuperar_contexto(consults_limit=10):
     }
 
     return context
+
+def get_last_active_session():
+    conn = sqlite3.connect('artemisa_local_db')
+    cursor  = conn.cursor()
+
+    cursor.execute("SELECT user_email FROM session ORDER BY id DESC LIMIT 1")
+    result_email = cursor.fetchone()
+
+    conn.close()
+
+    if result_email:
+        cursor.execute("SELECT username FROM local_users WHERE id=?", (result_email,))
+        result_username = cursor.fetchone()
+        return result_username[0], result_email    # Retorna el nombre de usuario y el correo
+    else:
+        return None, None #No hay sesión activa, devuelve None para activar modo guest
+    
+def update_session(email=None):
+    conn = sqlite3.connect('artemisa_local_db')
+    cursor = conn.cursor()
+
+    #Eliminar la sesión anterior
+    cursor.execute("DELETE FROM session")
+
+    #Insertar la última sesión activa (o modo guest si es None)
+    cursor.execute("INSERT INTO session (user_email) VALUES (?)", (email,))
+
+    conn.commit()
+    conn.close()
