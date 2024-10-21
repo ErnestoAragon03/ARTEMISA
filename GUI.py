@@ -6,14 +6,13 @@ import main
 
 mic_active = True
 
-class Application(tk.Tk):
-    def __init__(self):
-        #Configuración de Ventana
-        super().__init__()
-        self.title("Artemisa")
-        width = self.winfo_screenwidth()
-        height = self.winfo_screenheight()
-        self.geometry("%dx%d" % (width, height))
+class HomeScreen(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        #Configuración de Widgets de la pantalla principal
+        label = tk.Label(self, text="Home", font=("Arial", 18))
+        label.pack(pady=10)
         
         self.pipeline_thread = None
         self.start_pipeline()
@@ -27,7 +26,7 @@ class Application(tk.Tk):
 
         ###Frame que contiene el input de texto, botón de enviar y silenciar###
         botton_frame = tk.Frame(self)
-        botton_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=10)
+        botton_frame.pack(fill=tk.X, pady=10)
 
         ###Input de texto###
         self.text_input = tk.Entry(botton_frame, width=40)
@@ -40,8 +39,15 @@ class Application(tk.Tk):
         self.mic_button = tk.Button(botton_frame, text="Desactivar Micrófono", command= self.toggle_mic)
         self.mic_button.pack(side=tk.LEFT, padx=5)
 
-        ###Vincular el cierre de la ventana con la función on_closing (para terminar todos los procesos)
-        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+        ###Barra de navegación###
+        ##Botón para Pantalla de cuenta##
+        account_button = tk.Button(self, text="Cuenta", command=lambda: controller.show_frame("AccountScreen"))
+        account_button.pack(side=tk.BOTTOM, pady=10)
+
+        ##Botón para Pantalla Principal
+        self.home_button = tk.Button(self, text="Home", state="disabled", ) #Deshabilitado porque ya estamos en esta pantalla
+        self.home_button.pack(side=tk.BOTTOM, pady=10)
+        
 
     def send_text(self, event=None):
         user_input = self.text_input.get()  #Obtener el texto ingresado
@@ -86,14 +92,73 @@ class Application(tk.Tk):
         elif speaker=='assistant':
             self.transcription_area.insert(tk.END, f"{text}\n", "assistant")    #Transcipción de lado del asistente
         self.transcription_area.config(state=tk.DISABLED)
-    
-    ###Función para manejar el cierre de ventana###
+
+class AccountScreen(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+
+        #Configuración de Widgets de la pantalla principal
+        label = tk.Label(self, text="Account", font=("Arial", 18))
+        label.pack(pady=10)
+
+         ###Barra de navegación###
+        ##Botón para Pantalla de cuenta##
+        account_button = tk.Button(self, text="Cuenta", state="disabled")   #Deshabilitado porque ya estamos en esta pantalla
+        account_button.pack(side=tk.BOTTOM, pady=10)
+
+        ##Botón para Pantalla Principal
+        home_button = tk.Button(self, text="Home", command=lambda: controller.show_frame("HomeScreen"))
+        home_button.pack(side=tk.BOTTOM, pady=10)
+        
+
+
+class Application(tk.Tk):
+    def __init__(self):
+        tk.Tk.__init__(self)
+        ###Configuración de Ventana###
+        self.title("Artemisa")
+        width = self.winfo_screenwidth()
+        height = self.winfo_screenheight()
+        self.geometry("%dx%d" % (width, height))
+
+        ###Contenedor de pantallas (Frames)###
+        container = tk.Frame(self)
+        container.pack(side="top", fill="both", expand=True)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1) 
+
+        ###Diccionario para almacenar pantallas (Frames)###
+        self.frames = {}
+        ###Crear Frames para cada pantalla ###
+        for F in (HomeScreen, AccountScreen):
+            page_name = F.__name__
+            frame = F(parent=container, controller=self)
+            self.frames[page_name] = frame
+
+            #Los frames se apilan
+            frame.grid(row=0, column=0, sticky="nsew")  
+
+        self.show_frame("HomeScreen")   #Se inicia en la pantalla principal
+
+        ###Vincular el cierre de la ventana con la función on_closing (para terminar todos los procesos)
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+        
+    ###Función para mostrar pantallas
+    def show_frame(self, page_name):
+        frame = self.frames[page_name]
+        frame.tkraise() #Trae el Frame al frente
+
+    ###Función para terminar todos los procesos al cerrar la aplicación###
     def on_closing(self):
-        self.stop_pipeline()    #Detener el pipeline si es que está activo            
+        home_screen = self.frames["HomeScreen"] #Acceder a HomeScreen desde el diccionario de Frames
+        if hasattr(home_screen, 'stop_pipeline'):
+            print("Deteniendo Pipeline actual")
+            home_screen.stop_pipeline()
+                
         self.destroy()     #Cerrar la ventana
 
 ###Configuración inicial de la ventana###
 if __name__ == "__main__":
-    #root = tk.Tk()
     app = Application()
     app.mainloop()
