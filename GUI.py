@@ -157,7 +157,7 @@ class Application(tk.Tk):
             print("Deteniendo Pipeline actual")
             home_screen.stop_pipeline()
         ###Almacenar la sesión antes de cerrar###
-        local_db.update_session()
+        local_db.update_session(email)
         self.destroy()     #Cerrar la ventana
     
 
