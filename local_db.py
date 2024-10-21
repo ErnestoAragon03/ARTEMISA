@@ -60,7 +60,27 @@ def recuperar_contexto(consults_limit=10):
     }
 
     return context
+###Crear cuenta###
+def add_user(useraname, email, password):
+    try:
+        conn = sqlite3.connect('artemisa_local_db')
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO local_users (username, email, password) VALUES (?, ?, ?)", (useraname, email, password))
+        conn.commit()
+        conn.close()
+        return True
+    except sqlite3.IntegrityError:      #Ya existe una cuenta con ese correo
+        return False
 
+def authenticate_user(email, password):
+    conn = sqlite3.connect('artemisa_local_db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT FROM users WHERE email = ? AND password = ?", (email, password))
+    user = cursor.fetchone()
+    conn.close()
+    return user is not None
+
+###Obtener el correo y username de la última sesión activa###
 def get_last_active_session():
     conn = sqlite3.connect('artemisa_local_db')
     cursor  = conn.cursor()
@@ -68,12 +88,11 @@ def get_last_active_session():
     cursor.execute("SELECT user_email FROM session ORDER BY id DESC LIMIT 1")
     result_email = cursor.fetchone()
 
-    conn.close()
-
     if result_email:
-        cursor.execute("SELECT username FROM local_users WHERE id=?", (result_email,))
+        cursor.execute("SELECT username FROM local_users WHERE email=?", (result_email))
         result_username = cursor.fetchone()
-        return result_username[0], result_email    # Retorna el nombre de usuario y el correo
+        conn.close()
+        return result_username, result_email    # Retorna el nombre de usuario y el correo
     else:
         return None, None #No hay sesión activa, devuelve None para activar modo guest
     
@@ -85,7 +104,7 @@ def update_session(email=None):
     cursor.execute("DELETE FROM session")
 
     #Insertar la última sesión activa (o modo guest si es None)
-    cursor.execute("INSERT INTO session (user_email) VALUES (?)", (email,))
+    cursor.execute("INSERT INTO session (user_email) VALUES (?)", (email))
 
     conn.commit()
     conn.close()
