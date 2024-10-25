@@ -112,7 +112,7 @@ class AccountScreen(tk.Frame):
         title_label = tk.Label(frame, text="Iniciar Sesión")
         title_label.pack(pady=10)
         
-        #Campos de entrados
+        #Campos de entradas
         email_label = tk.Label(frame, text = "Email Asociado")
         email_label.pack(pady=5)
         self.email_entry = tk.Entry(frame)
@@ -155,7 +155,7 @@ class AccountScreen(tk.Frame):
 
         username_label = tk.Label(frame, text="Nombre de usuario (Este será el nombre por el que el asistente lo llamará)")
         username_label.pack(pady=5)
-        self.register_username_entry = tk.Entry(self)
+        self.register_username_entry = tk.Entry(frame)
         self.register_username_entry.pack(pady=5)
 
         password_label = tk.Label(frame, text="Contraseña")
