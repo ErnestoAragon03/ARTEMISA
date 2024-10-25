@@ -106,19 +106,6 @@ class AccountScreen(tk.Frame):
         self.profile_screen = self.init_profile_screen()
 
         self.show_login()
-
-        #Configuración de Widgets de la pantalla principal
-        #label = tk.Label(self, text="Account", font=("Arial", 18))
-        #label.pack(pady=10)
-
-         ###Barra de navegación###
-        ##Botón para Pantalla de cuenta##
-        #account_button = tk.Button(self, text="Cuenta", state="disabled")   #Deshabilitado porque ya estamos en esta pantalla
-        #account_button.pack(side=tk.BOTTOM, pady=10)
-
-        ##Botón para Pantalla Principal
-        #home_button = tk.Button(self, text="Home", command=lambda: controller.show_frame("HomeScreen"))
-        #home_button.pack(side=tk.BOTTOM, pady=10)
         
     #Pantalla de login
     def init_login_screen(self):
@@ -147,6 +134,11 @@ class AccountScreen(tk.Frame):
 
         self.switch_register_btn = tk.Button(frame, text="Crear cuenta", command=self.init_signin_screen)
         self.switch_register_btn.pack()
+
+        ###Barra de navegación###   
+        ##Botón para Pantalla Principal##
+        home_button = tk.Button(self, text="Home", command=lambda: self.app.show_frame(HomeScreen))
+        home_button.pack(side=tk.BOTTOM, pady=10)
 
         return frame
 
@@ -188,6 +180,11 @@ class AccountScreen(tk.Frame):
         self.switch_login_btn = tk.Button(frame, text="Iniciar sesión", command=self.init_login_screen)
         self.switch_login_btn.pack()
 
+        ###Barra de navegación###   
+        ##Botón para Pantalla Principal##
+        home_button = tk.Button(self, text="Home", command=lambda: self.app.show_frame(HomeScreen))
+        home_button.pack(side=tk.BOTTOM, pady=10)
+
         return frame
     
     ###Función de Profile (sesión ya inicidada)
@@ -204,6 +201,10 @@ class AccountScreen(tk.Frame):
         logout_btn = tk.Button(frame, text="Cerrar Sesión", command=self.logout)
         logout_btn.pack(pady=10)
 
+        ###Barra de navegación###   
+        ##Botón para Pantalla Principal##
+        home_button = tk.Button(self, text="Home", command=lambda: self.app.show_frame(HomeScreen))
+        home_button.pack(side=tk.BOTTOM, pady=10)
         return frame
     
     def show_login(self):
