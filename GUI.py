@@ -193,8 +193,8 @@ class AccountScreen(tk.Frame):
         title_label.pack(pady=10)
 
         #Mostrar nombre de usuario
-        user_label = tk.Label(frame, text="Usuario:")
-        user_label.pack(pady=5)
+        self.user_label = tk.Label(frame, text="Usuario:")
+        self.user_label.pack(pady=5)
 
         #Botón de cierre de sesión
         logout_btn = tk.Button(frame, text="Cerrar Sesión", command=self.logout)
@@ -238,10 +238,11 @@ class AccountScreen(tk.Frame):
         password = self.password_entry.get()
         
         if local_db.authenticate_user(email, password):
+            messagebox.showinfo("Éxito", "¡Sesión iniciada exitosamente!")
+            username = local_db.get_user(email=email)
             self.app.current_user = username
             self.app.current_email = email
-            messagebox.showinfo("Éxito", "¡Sesión iniciada exitosamente!")
-            self.app.switch_to_home()
+            self.show_profile(username=username)
         else:
             messagebox.showerror("Error", "Email o contraseña incorrectos")
 
@@ -258,7 +259,7 @@ class AccountScreen(tk.Frame):
             messagebox.showinfo("Éxito", "¡Cuenta creada exitosamente!")
             self.app.current_user = username
             self.app.current_email = email
-            self.app.switch_to_home()
+            self.show_login()
         else:
             messagebox.showerror("Error", "Ya hay una cuenta asociada con ese email")
     ###Función para Cerrar Sesión

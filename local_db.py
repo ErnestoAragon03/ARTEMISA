@@ -75,7 +75,7 @@ def add_user(useraname, email, password):
 def authenticate_user(email, password):
     conn = sqlite3.connect('artemisa_local_db')
     cursor = conn.cursor()
-    cursor.execute("SELECT FROM users WHERE email = ? AND password = ?", (email, password))
+    cursor.execute("SELECT * FROM local_users WHERE email = ? AND password = ?", (email, password))
     user = cursor.fetchone()
     conn.close()
     return user is not None
@@ -105,7 +105,15 @@ def update_session(email=None):
 
     #Insertar la última sesión activa (o modo guest si es None)
     if email:
-        cursor.execute("INSERT INTO session (user_email) VALUES (?)", (email))
+        cursor.execute("INSERT INTO session (user_email) VALUES (?)", (email,))
 
     conn.commit()
     conn.close()
+
+def get_user(email):
+    conn = sqlite3.connect('artemisa_local_db') 
+    cursor = conn.cursor()
+    cursor.execute("SELECT username FROM local_users WHERE email=(?)", (email,))
+    username = cursor.fetchone()
+    conn.close()
+    return username
