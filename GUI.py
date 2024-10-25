@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
 from threading import Thread
-import time
 import main
 import local_db
 
@@ -97,14 +96,14 @@ class HomeScreen(tk.Frame):
 class AccountScreen(tk.Frame):
     def __init__(self, parent, app):
         super().__init__(parent)
-        #self.controller = controller
         self.app = app 
         
         #Subpantallas de AccountScreen
         self.login_screen = self.init_login_screen()
-        self.signin_screen = self.init_signin_screen()
+        self.register_screen = self.init_register_screen()
         self.profile_screen = self.init_profile_screen()
 
+        #Por el momento se muestra Login por default
         self.show_login()
         
     #Pantalla de login
@@ -114,26 +113,26 @@ class AccountScreen(tk.Frame):
         title_label.pack(pady=10)
         
         #Campos de entrados
-        self.email_label = tk.Label(frame, text = "Email Asociado")
-        self.email_label.pack(pady=5)
+        email_label = tk.Label(frame, text = "Email Asociado")
+        email_label.pack(pady=5)
         self.email_entry = tk.Entry(frame)
         self.email_entry.pack(pady=5)
 
-        self.password_label = tk.Label(frame, text="Contraseña")
-        self.password_label.pack(pady=5)
+        password_label = tk.Label(frame, text="Contraseña")
+        password_label.pack(pady=5)
         self.password_entry = tk.Entry(frame, show="*")
         self.password_entry.pack(pady=5)
 
         # Botón para mostrar/ocultar contraseña
-        self.show_password_btn = tk.Button(frame, text="Mostrar", command=self.toggle_password)
-        self.show_password_btn.pack()
+        show_password_btn = tk.Button(frame, text="Mostrar", command=self.toggle_password)
+        show_password_btn.pack()
 
         # Botones de acciones
-        self.login_btn = tk.Button(frame, text="Iniciar sesión", command=self.login)
-        self.login_btn.pack(pady=10)
+        login_btn = tk.Button(frame, text="Iniciar sesión", command=self.login)
+        login_btn.pack(pady=10)
 
-        self.switch_register_btn = tk.Button(frame, text="Crear cuenta", command=self.init_signin_screen)
-        self.switch_register_btn.pack()
+        switch_register_btn = tk.Button(frame, text="Crear cuenta", command=self.show_register)
+        switch_register_btn.pack()
 
         ###Barra de navegación###   
         ##Botón para Pantalla Principal##
@@ -143,42 +142,42 @@ class AccountScreen(tk.Frame):
         return frame
 
     #Pantalla sign in
-    def init_signin_screen(self):
+    def init_register_screen(self):
         frame = tk.Frame(self)
         title_label = tk.Label(frame, text="Crear Cuenta")
         title_label.pack(pady=10)
 
         # Campos de entrada
-        self.email_label = tk.Label(frame, text="Email")
-        self.email_label.pack(pady=5)
-        self.email_entry = tk.Entry(frame)
-        self.email_entry.pack(pady=5)
+        email_label = tk.Label(frame, text="Email")
+        email_label.pack(pady=5)
+        self.register_email_entry = tk.Entry(frame)
+        self.register_email_entry.pack(pady=5)
 
-        self.username_label = tk.Label(frame, text="Nombre de usuario (Este será el nombre por el que el asistente lo llamará)")
-        self.username_label.pack(pady=5)
-        self.username_entry = tk.Entry(self)
-        self.username_entry.pack(pady=5)
+        username_label = tk.Label(frame, text="Nombre de usuario (Este será el nombre por el que el asistente lo llamará)")
+        username_label.pack(pady=5)
+        self.register_username_entry = tk.Entry(self)
+        self.register_username_entry.pack(pady=5)
 
-        self.password_label = tk.Label(frame, text="Contraseña")
-        self.password_label.pack(pady=5)
-        self.password_entry = tk.Entry(frame, show="*")
-        self.password_entry.pack(pady=5)
+        password_label = tk.Label(frame, text="Contraseña")
+        password_label.pack(pady=5)
+        self.register_password_entry = tk.Entry(frame, show="*")
+        self.register_password_entry.pack(pady=5)
 
-        self.confirm_password_label = tk.Label(frame, text="Confirmar contraseña")
-        self.confirm_password_label.pack(pady=5)
+        confirm_password_label = tk.Label(frame, text="Confirmar contraseña")
+        confirm_password_label.pack(pady=5)
         self.confirm_password_entry = tk.Entry(frame, show="*")
         self.confirm_password_entry.pack(pady=5)
 
         # Botón para mostrar/ocultar contraseña
-        self.show_password_btn = tk.Button(frame, text="Mostrar", command=self.toggle_password)
-        self.show_password_btn.pack()
+        show_password_btn = tk.Button(frame, text="Mostrar", command=self.toggle_password)
+        show_password_btn.pack()
 
         # Botones de acciones
-        self.register_btn = tk.Button(frame, text="Crear cuenta", command=self.register)
-        self.register_btn.pack(pady=10)
+        register_btn = tk.Button(frame, text="Crear cuenta", command=self.register)
+        register_btn.pack(pady=10)
 
-        self.switch_login_btn = tk.Button(frame, text="Iniciar sesión", command=self.init_login_screen)
-        self.switch_login_btn.pack()
+        switch_login_btn = tk.Button(frame, text="Iniciar sesión", command=self.show_login)
+        switch_login_btn.pack()
 
         ###Barra de navegación###   
         ##Botón para Pantalla Principal##
@@ -194,8 +193,8 @@ class AccountScreen(tk.Frame):
         title_label.pack(pady=10)
 
         #Mostrar nombre de usuario
-        self.user_label = tk.Label(frame, text="Usuario:")
-        self.user_label.pack(pady=5)
+        user_label = tk.Label(frame, text="Usuario:")
+        user_label.pack(pady=5)
 
         #Botón de cierre de sesión
         logout_btn = tk.Button(frame, text="Cerrar Sesión", command=self.logout)
@@ -211,9 +210,9 @@ class AccountScreen(tk.Frame):
         self.clear_frame()
         self.login_screen.pack()
 
-    def show_signin(self):
+    def show_register(self):
         self.clear_frame()
-        self.signin_screen.pack()
+        self.register_screen.pack()
     
     def show_profile(self, username):
         self.clear_frame()
@@ -223,19 +222,15 @@ class AccountScreen(tk.Frame):
     #Función para limpiar la pantalla de subpantallas
     def clear_frame(self):
         self.login_screen.pack_forget()
-        self.signin_screen.pack_forget()
+        self.register_screen.pack_forget()
         self.profile_screen.pack_forget()
 
     #Función de mostrar/ocultar contraseña
     def toggle_password(self):
-        if self.password_entry.cget('show') == '*':
-            self.password_entry.config(show='')
-            self.confirm_password_entry.config(show='') #Únicamente afecta a sign in
-            self.show_password_btn.config(text='Ocultar')
-        else:
-            self.password_entry.config(show='*')
-            self.confirm_password_entry.config(show='*')
-            self.show_password_btn.config(text='Mostrar')
+        show = "" if self.password_entry.cget("show") == "*" else "*"
+        self.password_entry.config(show=show)
+        self.register_password_entry.config(show=show)
+        self.confirm_password_entry.config(show=show)
     
     #Función para iniciar sesión (login)
     def login(self):
@@ -252,9 +247,9 @@ class AccountScreen(tk.Frame):
 
     ###Función para registrar usuarios (sign in)
     def register(self):
-        username = self.username_entry.get()
-        email = self.username_entry.get()
-        password = self.password_entry.get()
+        username = self.register_username_entry.get()
+        email = self.register_email_entry.get()
+        password = self.register_password_entry.get()
         confirm_password = self.confirm_password_entry.get()
 
         if password != confirm_password:
