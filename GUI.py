@@ -42,7 +42,7 @@ class HomeScreen(tk.Frame):
 
         ###Barra de navegación###
         ##Botón para Pantalla de cuenta##
-        account_button = tk.Button(self, text="Cuenta", command=lambda: controller.show_frame("AccountScreen"))
+        account_button = tk.Button(self, text="Cuenta", command=lambda: controller.show_frame(AccountScreen))
         account_button.pack(side=tk.BOTTOM, pady=10)
 
         ##Botón para Pantalla Principal
@@ -95,52 +95,203 @@ class HomeScreen(tk.Frame):
         self.transcription_area.config(state=tk.DISABLED)
 
 class AccountScreen(tk.Frame):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        self.controller = controller
+    def __init__(self, parent, app):
+        super().__init__(parent)
+        #self.controller = controller
+        self.app = app 
+        
+        #Subpantallas de AccountScreen
+        self.login_screen = self.init_login_screen()
+        self.signin_screen = self.init_signin_screen()
+        self.profile_screen = self.init_profile_screen()
+
+        self.show_login()
 
         #Configuración de Widgets de la pantalla principal
-        label = tk.Label(self, text="Account", font=("Arial", 18))
-        label.pack(pady=10)
+        #label = tk.Label(self, text="Account", font=("Arial", 18))
+        #label.pack(pady=10)
 
          ###Barra de navegación###
         ##Botón para Pantalla de cuenta##
-        account_button = tk.Button(self, text="Cuenta", state="disabled")   #Deshabilitado porque ya estamos en esta pantalla
-        account_button.pack(side=tk.BOTTOM, pady=10)
+        #account_button = tk.Button(self, text="Cuenta", state="disabled")   #Deshabilitado porque ya estamos en esta pantalla
+        #account_button.pack(side=tk.BOTTOM, pady=10)
 
         ##Botón para Pantalla Principal
-        home_button = tk.Button(self, text="Home", command=lambda: controller.show_frame("HomeScreen"))
-        home_button.pack(side=tk.BOTTOM, pady=10)
+        #home_button = tk.Button(self, text="Home", command=lambda: controller.show_frame("HomeScreen"))
+        #home_button.pack(side=tk.BOTTOM, pady=10)
         
+    #Pantalla de login
+    def init_login_screen(self):
+        frame = tk.Frame(self)
+        title_label = tk.Label(frame, text="Iniciar Sesión")
+        title_label.pack(pady=10)
+        
+        #Campos de entrados
+        self.email_label = tk.Label(frame, text = "Email Asociado")
+        self.email_label.pack(pady=5)
+        self.email_entry = tk.Entry(frame)
+        self.email_entry.pack(pady=5)
+
+        self.password_label = tk.Label(frame, text="Contraseña")
+        self.password_label.pack(pady=5)
+        self.password_entry = tk.Entry(frame, show="*")
+        self.password_entry.pack(pady=5)
+
+        # Botón para mostrar/ocultar contraseña
+        self.show_password_btn = tk.Button(frame, text="Mostrar", command=self.toggle_password)
+        self.show_password_btn.pack()
+
+        # Botones de acciones
+        self.login_btn = tk.Button(frame, text="Iniciar sesión", command=self.login)
+        self.login_btn.pack(pady=10)
+
+        self.switch_register_btn = tk.Button(frame, text="Crear cuenta", command=self.init_signin_screen)
+        self.switch_register_btn.pack()
+
+        return frame
+
+    #Pantalla sign in
+    def init_signin_screen(self):
+        frame = tk.Frame(self)
+        title_label = tk.Label(frame, text="Crear Cuenta")
+        title_label.pack(pady=10)
+
+        # Campos de entrada
+        self.email_label = tk.Label(frame, text="Email")
+        self.email_label.pack(pady=5)
+        self.email_entry = tk.Entry(frame)
+        self.email_entry.pack(pady=5)
+
+        self.username_label = tk.Label(frame, text="Nombre de usuario (Este será el nombre por el que el asistente lo llamará)")
+        self.username_label.pack(pady=5)
+        self.username_entry = tk.Entry(self)
+        self.username_entry.pack(pady=5)
+
+        self.password_label = tk.Label(frame, text="Contraseña")
+        self.password_label.pack(pady=5)
+        self.password_entry = tk.Entry(frame, show="*")
+        self.password_entry.pack(pady=5)
+
+        self.confirm_password_label = tk.Label(frame, text="Confirmar contraseña")
+        self.confirm_password_label.pack(pady=5)
+        self.confirm_password_entry = tk.Entry(frame, show="*")
+        self.confirm_password_entry.pack(pady=5)
+
+        # Botón para mostrar/ocultar contraseña
+        self.show_password_btn = tk.Button(frame, text="Mostrar", command=self.toggle_password)
+        self.show_password_btn.pack()
+
+        # Botones de acciones
+        self.register_btn = tk.Button(frame, text="Crear cuenta", command=self.register)
+        self.register_btn.pack(pady=10)
+
+        self.switch_login_btn = tk.Button(frame, text="Iniciar sesión", command=self.init_login_screen)
+        self.switch_login_btn.pack()
+
+        return frame
+    
+    ###Función de Profile (sesión ya inicidada)
+    def init_profile_screen(self):
+        frame = tk.Frame(self)
+        title_label = tk.Label(frame, text="Perfil")
+        title_label.pack(pady=10)
+
+        #Mostrar nombre de usuario
+        self.user_label = tk.Label(frame, text="Usuario:")
+        self.user_label.pack(pady=5)
+
+        #Botón de cierre de sesión
+        logout_btn = tk.Button(frame, text="Cerrar Sesión", command=self.logout)
+        logout_btn.pack(pady=10)
+
+        return frame
+    
+    def show_login(self):
+        self.clear_frame()
+        self.login_screen.pack()
+
+    def show_signin(self):
+        self.clear_frame()
+        self.signin_screen.pack()
+    
+    def show_profile(self, username):
+        self.clear_frame()
+        self.user_label.config(text=f"Usuario: {username}")
+        self.profile_screen.pack()
+
+    #Función para limpiar la pantalla de subpantallas
+    def clear_frame(self):
+        self.login_screen.pack_forget()
+        self.signin_screen.pack_forget()
+        self.profile_screen.pack_forget()
+
+    #Función de mostrar/ocultar contraseña
+    def toggle_password(self):
+        if self.password_entry.cget('show') == '*':
+            self.password_entry.config(show='')
+            self.confirm_password_entry.config(show='') #Únicamente afecta a sign in
+            self.show_password_btn.config(text='Ocultar')
+        else:
+            self.password_entry.config(show='*')
+            self.confirm_password_entry.config(show='*')
+            self.show_password_btn.config(text='Mostrar')
+    
+    #Función para iniciar sesión (login)
+    def login(self):
+        email = self.email_entry.get()
+        password = self.password_entry.get()
+        
+        if local_db.authenticate_user(email, password):
+            self.app.current_user = username
+            self.app.current_email = email
+            messagebox.showinfo("Éxito", "¡Sesión iniciada exitosamente!")
+            self.app.switch_to_home()
+        else:
+            messagebox.showerror("Error", "Email o contraseña incorrectos")
+
+    ###Función para registrar usuarios (sign in)
+    def register(self):
+        username = self.username_entry.get()
+        email = self.username_entry.get()
+        password = self.password_entry.get()
+        confirm_password = self.confirm_password_entry.get()
+
+        if password != confirm_password:
+            messagebox.showerror("Error", "Las contraseñas no coinciden")
+        elif local_db.add_user(username, email, password):
+            messagebox.showinfo("Éxito", "¡Cuenta creada exitosamente!")
+            self.app.current_user = username
+            self.app.current_email = email
+            self.app.switch_to_home()
+        else:
+            messagebox.showerror("Error", "Ya hay una cuenta asociada con ese email")
+    ###Función para Cerrar Sesión
+    def logout(self):
+        self.app.logout()
+        self.show_login()
 
 
 class Application(tk.Tk):
     def __init__(self):
-        tk.Tk.__init__(self)
+        super().__init__()
+        self.current_user = None
+        self.current_email = None
         ###Configuración de Ventana###
         self.title("Artemisa")
         width = self.winfo_screenwidth()
         height = self.winfo_screenheight()
         self.geometry("%dx%d" % (width, height))
 
-        ###Contenedor de pantallas (Frames)###
-        container = tk.Frame(self)
-        container.pack(side="top", fill="both", expand=True)
-        container.grid_rowconfigure(0, weight=1)
-        container.grid_columnconfigure(0, weight=1) 
-
         ###Diccionario para almacenar pantallas (Frames)###
         self.frames = {}
         ###Crear Frames para cada pantalla ###
-        for F in (HomeScreen, AccountScreen):
-            page_name = F.__name__
-            frame = F(parent=container, controller=self)
-            self.frames[page_name] = frame
-
+        for Screen in (HomeScreen, AccountScreen):
+            frame = Screen(self, self)
+            self.frames[Screen] = frame
             #Los frames se apilan
             frame.grid(row=0, column=0, sticky="nsew")  
 
-        self.show_frame("HomeScreen")   #Se inicia en la pantalla principal
+        self.show_frame(HomeScreen)   #Se inicia en la pantalla principal
 
         ###Vincular el cierre de la ventana con la función on_closing (para terminar todos los procesos)
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -150,9 +301,16 @@ class Application(tk.Tk):
         frame = self.frames[page_name]
         frame.tkraise() #Trae el Frame al frente
 
+    ###Función para cerrar sesión
+    def logout(self):
+        self.current_user = None
+        self.current_email = None
+        messagebox.showerror("Sesión cerrada", "Se ha cerrado la sesión, vuelve pronto.  Pasando al modo guest.")
+        self.show_frame(HomeScreen)
+
     ###Función para terminar todos los procesos al cerrar la aplicación###
     def on_closing(self):
-        home_screen = self.frames["HomeScreen"] #Acceder a HomeScreen desde el diccionario de Frames
+        home_screen = self.frames[HomeScreen] #Acceder a HomeScreen desde el diccionario de Frames
         if hasattr(home_screen, 'stop_pipeline'):
             print("Deteniendo Pipeline actual")
             home_screen.stop_pipeline()

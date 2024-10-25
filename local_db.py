@@ -104,7 +104,8 @@ def update_session(email=None):
     cursor.execute("DELETE FROM session")
 
     #Insertar la última sesión activa (o modo guest si es None)
-    cursor.execute("INSERT INTO session (user_email) VALUES (?)", (email))
+    if email:
+        cursor.execute("INSERT INTO session (user_email) VALUES (?)", (email))
 
     conn.commit()
     conn.close()
