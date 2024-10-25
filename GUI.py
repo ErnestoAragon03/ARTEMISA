@@ -136,7 +136,7 @@ class AccountScreen(tk.Frame):
 
         ###Barra de navegación###   
         ##Botón para Pantalla Principal##
-        home_button = tk.Button(self, text="Home", command=lambda: self.app.show_frame(HomeScreen))
+        home_button = tk.Button(frame, text="Home", command=lambda: self.app.show_frame(HomeScreen))
         home_button.pack(side=tk.BOTTOM, pady=10)
 
         return frame
@@ -181,7 +181,7 @@ class AccountScreen(tk.Frame):
 
         ###Barra de navegación###   
         ##Botón para Pantalla Principal##
-        home_button = tk.Button(self, text="Home", command=lambda: self.app.show_frame(HomeScreen))
+        home_button = tk.Button(frame, text="Home", command=lambda: self.app.show_frame(HomeScreen))
         home_button.pack(side=tk.BOTTOM, pady=10)
 
         return frame
@@ -202,7 +202,7 @@ class AccountScreen(tk.Frame):
 
         ###Barra de navegación###   
         ##Botón para Pantalla Principal##
-        home_button = tk.Button(self, text="Home", command=lambda: self.app.show_frame(HomeScreen))
+        home_button = tk.Button(frame, text="Home", command=lambda: self.app.show_frame(HomeScreen))
         home_button.pack(side=tk.BOTTOM, pady=10)
         return frame
     
