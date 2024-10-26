@@ -4,7 +4,8 @@ from tts import initialize_tts, generate_audio     # Módulo TTS
 import wake_up  #Módulo de wake words
 import local_db #Módulo de la base de datos local
 import GUI  #Interfaz gráfica
-import cloud_communication
+from cloud_communication import ask_to_openai
+from cloud_tts import generate_audio_OpenAI
 
 #Variable global que indica si se sigue ejecutando main
 running = True
@@ -52,7 +53,7 @@ def process_text(recognized_text):
         Usuario Actual: Aragón
         Información: Aragón es el usuario actual"""
         #response, context = generate_response(recognized_text, initial_context, llm_model, llm_tokenizer)
-        response = cloud_communication.ask_to_openai(recognized_text)
+        response = ask_to_openai(recognized_text)
         #Verificar que la respuesta no esté vacía
         print("RESPUESTA QUE REGRESÓ:", response)
         if not response or response == '[CLS]':
@@ -69,7 +70,8 @@ def process_text(recognized_text):
 
 def process_response(llm_response):
     #Procesamiento de la respuesta de LLM con el modelo TTS
-    generate_audio(llm_response, tts_model)
+    #generate_audio(llm_response, tts_model)
+    generate_audio_OpenAI(llm_response)
     pass
 
 def start_pipeline(app_instance):
