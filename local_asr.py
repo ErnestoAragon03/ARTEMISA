@@ -9,11 +9,6 @@ import queue
 from asr_sounds import play_activation_sound, play_deactivation_sound
 import main
 
-
-# Configura el modelo y el reconocimiento
-#laptop_DELL = "C:\User\ernes\OneDrive\Documentos\Proyecto ARTEMISA\ASR\Local\Model\vosk-model-small-es-0.42"
-#desktop = "C:\Users\Ernesto\Documents\Proyecto ARTEMISA\ASR\Local\Model\vosk-model-small-es-0.42"
-
 #Path hacia la ubicación del modelo Vosk (Modificar más adelante para evitar problemas de compatibilidad)
 model_path = r".\ASR\Local\Model\vosk-model-small-es-0.42"
 

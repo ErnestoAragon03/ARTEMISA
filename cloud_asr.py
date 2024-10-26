@@ -1,10 +1,14 @@
 from openai import OpenAI
 import sounddevice as sd
 import soundfile as sf
+import webrtcvad
 import numpy as np
-import scipy.io.wavfile as wav
+import time
+import queue
 import io
-import time 
+import tempfile
+import wave
+
 from asr_sounds import play_activation_sound, play_deactivation_sound
 
 client = OpenAI(
@@ -12,74 +16,92 @@ client = OpenAI(
     api_key = "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"
 )
 
-SAMPLERATE = 16000          #Frecuencia de muestreo (Hz)
-CHANNELS = 1                #Número de canales (mono)
-SILENCE_THRESHOLD = 100     # Nivel de silencio para detener (Ajustable según entorno)
-SILENCE_DURATION = 1        # Segundos de silencio antes de detener la grabación
-#Iniciar los tiempos de espera
+samplerate = 16000          #Frecuencia de muestreo (Hz)
+frame_duration = 30          #Duración de frame (ms)
+frame_size = int (samplerate * frame_duration / 1000)
+silence_threshold = 2    #Segundos de silencio antes de detener la grabación
+vad = webrtcvad.Vad(1)     #Nivel de sensibilidad (VAD)
+
+# Inicialización de la cola de audio y tiempos de espera
+audio_queue = queue.Queue()
 last_voice_time = time.time()
-is_listening = True
-last_detection_time = 0
+audio_buffer = io.BytesIO()  # Buffer de audio para almacenar los datos grabados
 #Variable donde guardar la respuesta de Whisper
-recognized_text =""
 conversation_active = False
+
+# Función de callback para la captura de audio
+def callback(indata, frames, time, status):
+    if status:
+        print(status)
+    audio_queue.put(indata.copy())
+
+# Función para dividir el audio en frames de tamaño adecuado para VAD
+def frame_generator(frame_size, audio_data):
+    for i in range(0, len(audio_data), frame_size):
+        yield audio_data[i:i + frame_size]
+
+# Función para procesar y verificar la actividad de voz en frames de audio
+def process_voice_activity(data):
+    global last_voice_time
+    for frame in frame_generator(frame_size, data):
+        is_speech = vad.is_speech(frame.tobytes(), samplerate)
+        if is_speech:
+            last_voice_time = time.time()
+            return True
+    return False
 
 #Captura el audio
 def capture_audio():
-    #Almacenar audio detectado un un buffer temporal
-    audio_data = []         #Almacena los bloques de audio grabados
-    silence_chunks = 0      #Conteo bloques con silencio 
-
-    def callback(indata, frames, time, status):
-        nonlocal silence_chunks, audio_data
-        volume_norm = np.linalg.norm(indata) * 10
-        
-        if volume_norm < SILENCE_THRESHOLD:
-            silence_chunks += 1 #Agregar al conteo de silencio
-        else:
-            silence_chunks = 0  #Reiniciar el conteo de silencio
-        
-        #Guardar el audio en cada llamada a callback
-        audio_data.extend(indata.copy())
-
-        #Terminar grabación si el silencio supera el Silence Duration
-        if silence_chunks > SILENCE_DURATION * SAMPLERATE / frames:
-            print(silence_chunks)
-            raise sd.CallbackStop()
-    
+    global last_voice_time    
     #Reproducir sonido de activación
     play_activation_sound()
     #Iniciar grabación
     print("Artemisa está escuchando...")
     #Captura de audio
-    with sd.InputStream(samplerate=SAMPLERATE, channels=CHANNELS, callback=callback):
-        sd.sleep(int(SILENCE_DURATION * 1000) + 20000)  # Duración máxima opcional (ms)
+    with sd.InputStream(samplerate=samplerate, blocksize=frame_size, channels=1, callback=callback, dtype='int16'):
+        print("Escuchando:")
 
-    #Convertir a un array de numpy
-    audio_np = np.array(audio_data, dtype=np.float32)
+        #Procesar datos de audio
+        while True:
+            data = audio_queue.get()
+            
+            audio_buffer.write(data)
+            #Verificar la actividad de voz en frame actual
+            if not(process_voice_activity(data)):
+                if time.time() - last_voice_time > silence_threshold:
+                    print("Usuario terminó de hablar")
+                    break   #Finalizar captura
+    
     play_deactivation_sound()
     print("Grabación terminada")
-    return audio_np
+    audio_buffer.seek(0)    #Reiniciar Buffer
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_audio_file:
+        with wave.open(temp_audio_file, 'wb') as wf:
+            wf.setnchannels(1)
+            wf.setsampwidth(2)  # 2 bytes para int16
+            wf.setframerate(samplerate)
+            wf.writeframes(audio_buffer.read())
 
-def save_and_transcribe(audio_np):
-    #Guardar el audio en un archivo .wav temporal
-    temp_file = "temp_audio.wav"
-    wav.write(temp_file, SAMPLERATE, audio_np)
+    print("Cerró capture_audio")
+    return temp_audio_file.name
 
+def save_and_transcribe(temp_audio_file_name):
+    print("Llegó a save_and_transcribe")
     #Enviar a Whisper
-    with open(temp_file, "rb") as audio_file:
-        transcription = client.audio.transcriptions.create(
-            model="whisper-1",
-            file=audio_file
-        )
+    with open(temp_audio_file_name, "rb") as audio_file:
+            transcription = client.audio.transcriptions.create(
+                model="whisper-1",
+                file=audio_file,
+                language="es"
+            )
     transcription_text = transcription.text
     print("Texto final reconocido: ", transcription_text)
     return transcription_text
 
 def transcribe():
     try:
-        audio_np = capture_audio()
-        transcription = save_and_transcribe(audio_np=audio_np)
+        temp_audio_file_name = capture_audio()
+        transcription = save_and_transcribe(temp_audio_file_name=temp_audio_file_name)
         return transcription
     except Exception as e:
         print("Error: ", e)
