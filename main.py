@@ -4,6 +4,7 @@ from tts import initialize_tts, generate_audio     # Módulo TTS
 import wake_up  #Módulo de wake words
 import local_db #Módulo de la base de datos local
 import GUI  #Interfaz gráfica
+import cloud_communication
 
 #Variable global que indica si se sigue ejecutando main
 running = True
@@ -50,12 +51,14 @@ def process_text(recognized_text):
         Nombres: Rebecca
         Usuario Actual: Aragón
         Información: Aragón es el usuario actual"""
-        response, context = generate_response(recognized_text, initial_context, llm_model, llm_tokenizer)
+        #response, context = generate_response(recognized_text, initial_context, llm_model, llm_tokenizer)
+        response = cloud_communication.ask_to_openai(recognized_text)
         #Verificar que la respuesta no esté vacía
-        if not response or response.strip() == "" or response == '[CLS]':
+        print("RESPUESTA QUE REGRESÓ:", response)
+        if not response or response == '[CLS]':
             raise ValueError("La respuesta del LLM está vacía")    
         print(f"Respuesta del LLM: {response}")
-        print(f"Contexto: {context}")
+        #print(f"Contexto: {context}")
     except ValueError as ve:
         print(f"Error en la respuesta del LLM: {ve}")
         response = "Hubo un error en la respuesta, intentelo nuevamente"

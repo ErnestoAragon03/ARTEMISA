@@ -1,20 +1,30 @@
-import openai
+from openai import OpenAI
+import local_db
 
-#Configurar API key de OpenAI
-openai.api_key = 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
+client = OpenAI(
+    #organization= 'org-BLKMXfWSb6Ytc2bIO4tIJ6EM',
+    #project= 'proj_9mma3BD13IrvUCF1pmCHNHgc'
+    #Configurar API key de OpenAI
+    api_key = "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"
+
+)
 
 def ask_to_openai(prompt):
     try:
-        answer = openai.Completion.create(
-            engine="text-davinchi-003"
-            prompt=prompt,
-            max_tokens=150,     #Limitar palabras en la respuesta
-            temperature=0.7     #Ajustar creatividad de respuesta
+        answer_raw = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
+            ],
+            model="gpt-4o",
         )
-
+        answer = answer_raw.choices[0].message.content
         #Extraer y retornar respuesta
-        print(answer)
-        return answer.choices[0].text.strip()
+        print()
+        local_db.insertar_consulta(question=prompt,answer=answer)
+        return answer
     except Exception as e:
         print(f"Error al obtener respuesta de OpenAI: {e}")
         return None
