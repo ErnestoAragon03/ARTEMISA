@@ -14,17 +14,18 @@ def init_db():
     
     #Crear tabla de consultas recientes
     cursor.execute('''CREATE TABLE IF NOT EXISTS recent_consults(
-                email TEXT PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                email TEXT,
                 question TEXT NOT NULL,
                 answer TEXT NOT NULL,
                 timestamp DATATIME DEFAULT CURRENT_TIMESTAMP)''')
     conn.commit()
     conn.close()
 
-def insertar_consulta(question, answer):
+def insertar_consulta(question, answer, email):
     conn = sqlite3.connect('artemisa_local_db')
     cursor  = conn.cursor()
-    cursor.execute("INSERT INTO recent_consults (question, answer) VALUES (?, ?)", (question, answer))
+    cursor.execute("INSERT INTO recent_consults (question, answer, email) VALUES (?, ?, ?)", (question, answer, email))
     conn.commit()
     conn.close()
 

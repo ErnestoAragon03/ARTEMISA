@@ -7,6 +7,8 @@ import webrtcvad
 import time
 import queue
 from asr_sounds import play_activation_sound, play_deactivation_sound
+import main
+
 
 # Configura el modelo y el reconocimiento
 #laptop_DELL = "C:\User\ernes\OneDrive\Documentos\Proyecto ARTEMISA\ASR\Local\Model\vosk-model-small-es-0.42"
@@ -18,7 +20,7 @@ model_path = r".\ASR\Local\Model\vosk-model-small-es-0.42"
 #Parámetros del audio
 samplerate = 16000  #Frecuencia de muestreo (Depende del micrófono)
 blocksize = 8000     #Tamaño de los bloques de procesamiento
-dtype = 'int16'     #Formato de los datos de audio
+dtype = 'int16'     #Formato de     los datos de audio
 frame_duration = 30 #ms
 frame_size = int(samplerate * frame_duration /1000)
 
@@ -36,13 +38,9 @@ is_listening = True
 last_detection_time = 0
 detection_cooldown = 0.5    #Umbral para evitar repetir palabras
 
-#Variable donde almacenar el texto transcrito por Vosk
-recognized_text =""
-conversation_active = False
-
 def start_asr_local(app_instance):
-    global recognized_text, conversation_active
-    
+    global recognized_text
+    recognized_text = ""
     #Cola para almacenar los datos de audio
     audio_queue = queue.Queue()
 
@@ -89,5 +87,6 @@ def start_asr_local(app_instance):
     print(f"Texto final reconocido: {recognized_text}")
     if recognized_text:
         app_instance.transcribe(text=recognized_text, speaker='user')     #Pasa el texto capturado a la interfaz gráfica
-    conversation_active = True  
+    main.conversation_active = True  
     play_deactivation_sound()
+    return recognized_text

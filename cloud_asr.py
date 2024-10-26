@@ -74,3 +74,11 @@ def save_and_transcribe(audio_np):
     transcription_text = transcription["text"]
     print("Texto final reconocido: ", transcription_text)
     return transcription_text
+
+def transcribe():
+    try:
+        audio_np = capture_audio()
+        transcription = save_and_transcribe(audio_np=audio_np)
+        return transcription
+    except Exception as e:
+        print("Error: ", e)

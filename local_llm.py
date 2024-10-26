@@ -27,6 +27,5 @@ def generate_response(question, context, model, tokenizer):
     answer_end = torch.argmax(outputs.end_logits) + 1
     #Decodificar la respuesta a texto y devolverla
     answer = tokenizer.convert_tokens_to_string(tokenizer.convert_ids_to_tokens(inputs_ids[answer_start:answer_end]))
-    local_db.insertar_consulta(question=question,answer=answer)
     context = local_db.recuperar_contexto()
     return answer, context
