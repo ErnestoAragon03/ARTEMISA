@@ -3,6 +3,7 @@ from tkinter import messagebox
 from threading import Thread
 import main
 import local_db
+import re
 
 mic_active = True
 
@@ -257,8 +258,19 @@ class AccountScreen(tk.Frame):
         email = self.register_email_entry.get()
         password = self.register_password_entry.get()
         confirm_password = self.confirm_password_entry.get()
-
-        if password != confirm_password:
+        if username == '' or email == '' or password == '':
+            messagebox.showerror("Campos incompletos", "Complete todos los campos porfavor")
+        elif self.validate_email(email):
+            messagebox.showerror("Correo inválido", "Ingrese una dirección de correo válida")
+        elif self.validate_password(password):
+            messagebox.showerror("Contraseña inválida", 
+                                 "La contraseña no es válida.\n\nDebe cumplir con los siguientes requisitos:\n"
+                                 "- Al menos 8 caracteres de longitud\n"
+                                 "- Al menos una mayúscula \n"
+                                 "- Al menos una minúsucla \n"
+                                 "- Al menos un número\n"
+                                 "- Al menos un caracter especial (@, $, !, %, *, ?, &)")
+        elif password != confirm_password:
             messagebox.showerror("Error", "Las contraseñas no coinciden")
         elif local_db.add_user(username, email, password):
             messagebox.showinfo("Éxito", "¡Cuenta creada exitosamente!")
@@ -268,6 +280,17 @@ class AccountScreen(tk.Frame):
         else:
             messagebox.showerror("Error", "Ya hay una cuenta asociada con ese email")
 
+    ###Funciones de validación de campos ###
+    def validate_email(self, email):
+        print("EMAIL: ", email)
+        patron = r"^[\w\.-]+@[\w\.-]+\.\w+$"    #Expresión regular
+        print(re.match(patron, email))
+        return re.match(patron, email) is None
+    def validate_password(self, password):
+        print("PASSWORD: ", password)
+        patron = r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$" #Expresión regular
+        print(re.match(patron, password))
+        return re.match(patron, password) is None
     ###Función para limpiar campos de login y register###
     def reset_fields(self):
         self.email_entry.delete(0, tk.END)
