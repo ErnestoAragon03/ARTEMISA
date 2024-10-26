@@ -267,9 +267,22 @@ class AccountScreen(tk.Frame):
             self.show_profile(username=username, email=email)
         else:
             messagebox.showerror("Error", "Ya hay una cuenta asociada con ese email")
+
+    ###Función para limpiar campos de login y register###
+    def reset_fields(self):
+        self.email_entry.delete(0, tk.END)
+        self.password_entry.delete(0, tk.END)
+        self.register_username_entry.delete(0, tk.END)
+        self.register_email_entry.delete(0, tk.END)
+        self.register_password_entry.delete(0, tk.END)
+        self.confirm_password_entry.delete(0, tk.END)
+        if self.password_entry.cget("show") == "":
+            self.toggle_password()
+        
     ###Función para Cerrar Sesión
     def logout(self):
         self.app.logout()
+        self.reset_fields()
         self.show_login()
 
 
