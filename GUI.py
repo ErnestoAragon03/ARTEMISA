@@ -122,12 +122,13 @@ class AccountScreen(tk.Frame):
         email_label.pack(pady=5)
         self.email_entry = tk.Entry(frame)
         self.email_entry.pack(pady=5)
+        self.email_entry.bind("<Return>", self.login)  #Vincular la tecla Enter para enviar datos al login
 
         password_label = tk.Label(frame, text="Contraseña")
         password_label.pack(pady=5)
         self.password_entry = tk.Entry(frame, show="*")
         self.password_entry.pack(pady=5)
-
+        self.password_entry.bind("<Return>", self.login)  #Vincular la tecla Enter para enviar datos al login
         # Botón para mostrar/ocultar contraseña
         show_password_btn = tk.Button(frame, text="Mostrar", command=self.toggle_password)
         show_password_btn.pack()
@@ -157,21 +158,25 @@ class AccountScreen(tk.Frame):
         email_label.pack(pady=5)
         self.register_email_entry = tk.Entry(frame)
         self.register_email_entry.pack(pady=5)
+        self.register_email_entry.bind("<Return>", self.register)  #Vincular la tecla Enter para enviar datos al Register
 
         username_label = tk.Label(frame, text="Nombre de usuario (Este será el nombre por el que el asistente lo llamará)")
         username_label.pack(pady=5)
         self.register_username_entry = tk.Entry(frame)
         self.register_username_entry.pack(pady=5)
+        self.register_username_entry.bind("<Return>", self.register)  #Vincular la tecla Enter para enviar datos al Register
 
         password_label = tk.Label(frame, text="Contraseña")
         password_label.pack(pady=5)
         self.register_password_entry = tk.Entry(frame, show="*")
         self.register_password_entry.pack(pady=5)
+        self.register_password_entry.bind("<Return>", self.register)  #Vincular la tecla Enter para enviar datos al Register
 
         confirm_password_label = tk.Label(frame, text="Confirmar contraseña")
         confirm_password_label.pack(pady=5)
         self.confirm_password_entry = tk.Entry(frame, show="*")
         self.confirm_password_entry.pack(pady=5)
+        self.confirm_password_entry.bind("<Return>", self.register)  #Vincular la tecla Enter para enviar datos al Register
 
         # Botón para mostrar/ocultar contraseña
         show_password_btn = tk.Button(frame, text="Mostrar", command=self.toggle_password)
@@ -238,7 +243,7 @@ class AccountScreen(tk.Frame):
         self.confirm_password_entry.config(show=show)
     
     #Función para iniciar sesión (login)
-    def login(self):
+    def login(self, event=None):
         email = self.email_entry.get()
         password = self.password_entry.get()
         
@@ -253,7 +258,7 @@ class AccountScreen(tk.Frame):
             messagebox.showerror("Error", "Email o contraseña incorrectos")
 
     ###Función para registrar usuarios (sign in)
-    def register(self):
+    def register(self, event=None):
         username = self.register_username_entry.get()
         email = self.register_email_entry.get()
         password = self.register_password_entry.get()
