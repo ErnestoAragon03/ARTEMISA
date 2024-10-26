@@ -116,4 +116,4 @@ def get_user(email):
     cursor.execute("SELECT username FROM local_users WHERE email=(?)", (email,))
     username = cursor.fetchone()
     conn.close()
-    return username
+    return username[0]

@@ -259,7 +259,7 @@ class AccountScreen(tk.Frame):
             messagebox.showinfo("Éxito", "¡Cuenta creada exitosamente!")
             self.app.current_user = username
             self.app.current_email = email
-            self.show_login()
+            self.show_profile(username=username)
         else:
             messagebox.showerror("Error", "Ya hay una cuenta asociada con ese email")
     ###Función para Cerrar Sesión
