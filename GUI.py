@@ -246,8 +246,9 @@ class AccountScreen(tk.Frame):
     def login(self, event=None):
         email = self.email_entry.get()
         password = self.password_entry.get()
-        
-        if local_db.authenticate_user(email, password):
+        if email == '' or password == '':
+            messagebox.showerror("Campos incompletos", "Complete todos los campos porfavor")
+        elif local_db.authenticate_user(email, password):
             messagebox.showinfo("Éxito", "¡Sesión iniciada exitosamente!")
             username = local_db.get_user(email=email)
             self.app.current_user = username
