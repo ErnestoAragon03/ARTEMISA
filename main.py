@@ -1,6 +1,6 @@
-import asr  # Módulo ASR
-from llm import initialize_llm, generate_response  # Módulo LLM
-from tts import initialize_tts, generate_audio     # Módulo TTS
+import local_asr  # Módulo ASR
+from local_llm import initialize_llm, generate_response  # Módulo LLM
+from local_tts import initialize_tts, generate_audio     # Módulo TTS
 import wake_up  #Módulo de wake words
 import local_db #Módulo de la base de datos local
 import GUI  #Interfaz gráfica
@@ -13,9 +13,9 @@ running = True
 def main(app_instance):
     global context, running
     while running:
-        if asr.conversation_active & GUI.mic_active:
+        if local_asr.conversation_active & GUI.mic_active:
             #Iniciar el ASR en un hilo separado
-            asr.start_asr_local(app_instance)   #QUIZÁS REQUIERA DEL USO DE HILOS EN PARALELO
+            local_asr.start_asr_local(app_instance)   #QUIZÁS REQUIERA DEL USO DE HILOS EN PARALELO
         else:
             #Esperar a que se active el microfono ESTO SE TIENE QUE CAMBIAR, MUY INEFICIENTE
         #while not GUI.mic_active:
@@ -25,19 +25,19 @@ def main(app_instance):
             awaked = wake_up.recognize_wake_word()
             #Iniciar el ASR en un hilo separado
             if awaked:
-                asr.start_asr_local(app_instance)
+                local_asr.start_asr_local(app_instance)
             
         if  GUI.mic_active: #Si el microfono estaba activo al momento de llegar
-            if asr.recognized_text:  #Si se ha detectado texto...
-                print(f"Texto detectado: {asr.recognized_text}")
+            if local_asr.recognized_text:  #Si se ha detectado texto...
+                print(f"Texto detectado: {local_asr.recognized_text}")
                 #Enviar a LLM
-                llm_response = process_text(asr.recognized_text)
+                llm_response = process_text(local_asr.recognized_text)
                 app_instance.transcribe(text=llm_response, speaker='assistant')
                 #Enviar a TTS
                 process_response(llm_response)
-                asr.recognized_text = ""  #Reiniciar despúes de procesar el texto
+                local_asr.recognized_text = ""  #Reiniciar despúes de procesar el texto
             else:
-                asr.conversation_active = False
+                local_asr.conversation_active = False
 
         else:
             print("Terminando Pipeline")

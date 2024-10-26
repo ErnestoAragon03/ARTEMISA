@@ -6,18 +6,14 @@ import sys  # Importa la librería sys
 import webrtcvad
 import time
 import queue
-import GUI
+from asr_sounds import play_activation_sound, play_deactivation_sound
 
 # Configura el modelo y el reconocimiento
 #laptop_DELL = "C:\User\ernes\OneDrive\Documentos\Proyecto ARTEMISA\ASR\Local\Model\vosk-model-small-es-0.42"
 #desktop = "C:\Users\Ernesto\Documents\Proyecto ARTEMISA\ASR\Local\Model\vosk-model-small-es-0.42"
 
 #Path hacia la ubicación del modelo Vosk (Modificar más adelante para evitar problemas de compatibilidad)
-model_path = r"C:\Users\Ernesto\Documents\Proyecto ARTEMISA\ASR\Local\Model\vosk-model-small-es-0.42"
-
-#Path hacia efectos de sonido
-activation_sound_path = "./ASR/SoundEffects/start_beep.mp3"
-deactivation_sound_path = "./ASR/SoundEffects/stop_beep.mp3"
+model_path = r".\ASR\Local\Model\vosk-model-small-es-0.42"
 
 #Parámetros del audio
 samplerate = 16000  #Frecuencia de muestreo (Depende del micrófono)
@@ -44,30 +40,13 @@ detection_cooldown = 0.5    #Umbral para evitar repetir palabras
 recognized_text =""
 conversation_active = False
 
-def play_activation_sound():
-    #Reproduce un sonido cuando se activa el ASR
-    try:
-        data, samplerate = sf.read(activation_sound_path)
-        sd.play(data, samplerate)
-        sd.wait()
-    except Exception as e:
-        print(f"Error al reproducir sonido: {e}")
-
-def play_deactivation_sound():
-    #Reproduce un sonido cuando se desactiva el ASR
-    try:
-        data, samplerate = sf.read(deactivation_sound_path)
-        sd.play(data, samplerate)
-        sd.wait()
-    except Exception as e:
-        print(f"Error al reproducir sonido: {e}")
-
 def start_asr_local(app_instance):
     global recognized_text, conversation_active
     
     #Cola para almacenar los datos de audio
     audio_queue = queue.Queue()
 
+    #Reproducir sonido de activación
     play_activation_sound()
     #print(sd.query_devices())       #Imprime la lista de todos los dispositivos conectados a la computadora
     # Función de callback para el flujo de audio
