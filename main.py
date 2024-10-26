@@ -4,7 +4,7 @@ from tts import initialize_tts, generate_audio     # Módulo TTS
 import wake_up  #Módulo de wake words
 import local_db #Módulo de la base de datos local
 import GUI  #Interfaz gráfica
-from cloud_communication import ask_to_openai
+from cloud_llm import ask_to_openai
 from cloud_tts import generate_audio_OpenAI
 
 #Variable global que indica si se sigue ejecutando main

@@ -3,11 +3,8 @@ import sounddevice as sd
 import numpy as np
 
 client = OpenAI(
-    #organization= 'org-BLKMXfWSb6Ytc2bIO4tIJ6EM',
-    #project= 'proj_9mma3BD13IrvUCF1pmCHNHgc'
     #Configurar API key de OpenAI
     api_key = "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"
-
 )
 
 def generate_audio_OpenAI(input_text):
