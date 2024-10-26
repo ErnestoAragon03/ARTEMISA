@@ -17,22 +17,25 @@ def main(app_instance):
     while running:
         if conversation_active & GUI.mic_active:
             #Iniciar el ASR en un hilo separado
-            recognized_text = start_asr_local(app_instance)   #QUIZÁS REQUIERA DEL USO DE HILOS EN PARALELO
+            #recognized_text = start_asr_local(app_instance)   #QUIZÁS REQUIERA DEL USO DE HILOS EN PARALELO
+
+            ###ASR en línea
+            recognized_text = transcribe()
+
             print("recognized_text: ", recognized_text)
         else:
-            #Esperar a que se active el microfono ESTO SE TIENE QUE CAMBIAR, MUY INEFICIENTE
-        #while not GUI.mic_active:
-                #NO hacer nada
-                #print("Mic Muted")
-            #Esperar wake word
             awaked = wake_up.recognize_wake_word()
             #Iniciar el ASR en un hilo separado
             if awaked:
-                recognized_text = start_asr_local(app_instance)
+                #recognized_text = start_asr_local(app_instance)
+                recognized_text = transcribe()
+
             
         if  GUI.mic_active: #Si el microfono estaba activo al momento de llegar
             if recognized_text:  #Si se ha detectado texto...
                 print(f"Texto detectado: {recognized_text}")
+                
+                app_instance.transcribe(text=recognized_text, speaker='user')     #Pasa el texto capturado a la interfaz gráfica
                 #Enviar a LLM
                 llm_response = process_text(recognized_text)
                 app_instance.transcribe(text=llm_response, speaker='assistant')

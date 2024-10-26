@@ -85,8 +85,6 @@ def start_asr_local(app_instance):
                 print(f"Escuchando: {recognized_text+partial_text}")
     #Resultado final
     print(f"Texto final reconocido: {recognized_text}")
-    if recognized_text:
-        app_instance.transcribe(text=recognized_text, speaker='user')     #Pasa el texto capturado a la interfaz gráfica
     main.conversation_active = True  
     play_deactivation_sound()
     return recognized_text

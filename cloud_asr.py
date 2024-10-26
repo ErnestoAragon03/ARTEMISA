@@ -15,7 +15,7 @@ client = OpenAI(
 SAMPLERATE = 16000          #Frecuencia de muestreo (Hz)
 CHANNELS = 1                #Número de canales (mono)
 SILENCE_THRESHOLD = 100     # Nivel de silencio para detener (Ajustable según entorno)
-SILENCE_DURATION = 2        # Segundos de silencio antes de detener la grabación
+SILENCE_DURATION = 1        # Segundos de silencio antes de detener la grabación
 #Iniciar los tiempos de espera
 last_voice_time = time.time()
 is_listening = True
@@ -44,6 +44,7 @@ def capture_audio():
 
         #Terminar grabación si el silencio supera el Silence Duration
         if silence_chunks > SILENCE_DURATION * SAMPLERATE / frames:
+            print(silence_chunks)
             raise sd.CallbackStop()
     
     #Reproducir sonido de activación
@@ -51,8 +52,8 @@ def capture_audio():
     #Iniciar grabación
     print("Artemisa está escuchando...")
     #Captura de audio
-    with sd.InputStream(callback=callback, samplerate=SAMPLERATE, channels=CHANNELS):
-        last_voice_time = time.time()
+    with sd.InputStream(samplerate=SAMPLERATE, channels=CHANNELS, callback=callback):
+        sd.sleep(int(SILENCE_DURATION * 1000) + 20000)  # Duración máxima opcional (ms)
 
     #Convertir a un array de numpy
     audio_np = np.array(audio_data, dtype=np.float32)
@@ -71,7 +72,7 @@ def save_and_transcribe(audio_np):
             model="whisper-1",
             file=audio_file
         )
-    transcription_text = transcription["text"]
+    transcription_text = transcription.text
     print("Texto final reconocido: ", transcription_text)
     return transcription_text
 
