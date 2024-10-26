@@ -8,6 +8,7 @@ import queue
 import io
 import tempfile
 import wave
+import main
 
 from asr_sounds import play_activation_sound, play_deactivation_sound
 
@@ -19,15 +20,14 @@ client = OpenAI(
 samplerate = 16000          #Frecuencia de muestreo (Hz)
 frame_duration = 30          #Duración de frame (ms)
 frame_size = int (samplerate * frame_duration / 1000)
-silence_threshold = 2    #Segundos de silencio antes de detener la grabación
-vad = webrtcvad.Vad(1)     #Nivel de sensibilidad (VAD)
+silence_threshold = 5    #Segundos de silencio antes de detener la grabación
+vad = webrtcvad.Vad(2)     #Nivel de sensibilidad (VAD)
 
 # Inicialización de la cola de audio y tiempos de espera
 audio_queue = queue.Queue()
 last_voice_time = time.time()
 audio_buffer = io.BytesIO()  # Buffer de audio para almacenar los datos grabados
-#Variable donde guardar la respuesta de Whisper
-conversation_active = False
+
 
 # Función de callback para la captura de audio
 def callback(indata, frames, time, status):
@@ -96,9 +96,12 @@ def save_and_transcribe(temp_audio_file_name):
             )
     transcription_text = transcription.text
     print("Texto final reconocido: ", transcription_text)
-    return transcription_text
+    if transcription_text:
+        main.conversation_active = True
+        return transcription_text
 
 def transcribe():
+    transcription = ""
     try:
         temp_audio_file_name = capture_audio()
         transcription = save_and_transcribe(temp_audio_file_name=temp_audio_file_name)

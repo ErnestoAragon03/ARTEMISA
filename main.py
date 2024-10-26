@@ -13,7 +13,7 @@ running = True
 conversation_active = False
 
 def main(app_instance):
-    global context, running, conversation_active
+    global context, running, conversation_active, recognized_text
     while running:
         if conversation_active & GUI.mic_active:
             #Iniciar el ASR en un hilo separado
@@ -34,7 +34,7 @@ def main(app_instance):
         if  GUI.mic_active: #Si el microfono estaba activo al momento de llegar
             if recognized_text:  #Si se ha detectado texto...
                 print(f"Texto detectado: {recognized_text}")
-                
+
                 app_instance.transcribe(text=recognized_text, speaker='user')     #Pasa el texto capturado a la interfaz gráfica
                 #Enviar a LLM
                 llm_response = process_text(recognized_text)
