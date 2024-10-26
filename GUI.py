@@ -104,7 +104,11 @@ class AccountScreen(tk.Frame):
         self.profile_screen = self.init_profile_screen()
 
         #Por el momento se muestra Login por default
-        self.show_login()
+        username, email = local_db.get_last_active_session()
+        if username:
+            self.show_profile(username=username, email=email)
+        else:
+            self.show_login()
         
     #Pantalla de login
     def init_login_screen(self):
@@ -214,7 +218,7 @@ class AccountScreen(tk.Frame):
         self.clear_frame()
         self.register_screen.pack()
     
-    def show_profile(self, username):
+    def show_profile(self, username, email):
         self.clear_frame()
         self.user_label.config(text=f"Usuario: {username}")
         self.profile_screen.pack()
@@ -242,7 +246,8 @@ class AccountScreen(tk.Frame):
             username = local_db.get_user(email=email)
             self.app.current_user = username
             self.app.current_email = email
-            self.show_profile(username=username)
+            self.show_profile(username=username, email=email)
+            local_db.update_session(email)
         else:
             messagebox.showerror("Error", "Email o contraseña incorrectos")
 
@@ -259,7 +264,7 @@ class AccountScreen(tk.Frame):
             messagebox.showinfo("Éxito", "¡Cuenta creada exitosamente!")
             self.app.current_user = username
             self.app.current_email = email
-            self.show_profile(username=username)
+            self.show_profile(username=username, email=email)
         else:
             messagebox.showerror("Error", "Ya hay una cuenta asociada con ese email")
     ###Función para Cerrar Sesión
@@ -303,6 +308,7 @@ class Application(tk.Tk):
         self.current_user = None
         self.current_email = None
         messagebox.showerror("Sesión cerrada", "Se ha cerrado la sesión, vuelve pronto.  Pasando al modo guest.")
+        local_db.update_session(email=None)
         self.show_frame(HomeScreen)
 
     ###Función para terminar todos los procesos al cerrar la aplicación###
@@ -311,8 +317,6 @@ class Application(tk.Tk):
         if hasattr(home_screen, 'stop_pipeline'):
             print("Deteniendo Pipeline actual")
             home_screen.stop_pipeline()
-        ###Almacenar la sesión antes de cerrar###
-        local_db.update_session(email)
         self.destroy()     #Cerrar la ventana
     
 
@@ -323,7 +327,7 @@ if __name__ == "__main__":
     ###Obtener el nombre de usuario y correo de la última cuenta activa, si es que hay una###
     username, email = local_db.get_last_active_session()
     if username:
-        print(f"Sesión iniciada en la cuenta {username}")
+        print(f"Sesión ini  ciada en la cuenta {username}")
     else:
         print("Modo guest")
 

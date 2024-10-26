@@ -18,11 +18,6 @@ def init_db():
                 question TEXT NOT NULL,
                 answer TEXT NOT NULL,
                 timestamp DATATIME DEFAULT CURRENT_TIMESTAMP)''')
-         
-    #Crear tabla de sesiones activas
-    cursor.execute('''CREATE TABLE IF NOT EXISTS session(
-                   user_email TEXT PRIMARY KEY,
-                   FOREIGN KEY(user_email) REFERENCES local_users(email))''')
     conn.commit()
     conn.close()
 
@@ -59,7 +54,7 @@ def add_user(useraname, email, password):
     try:
         conn = sqlite3.connect('artemisa_local_db')
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO local_users (username, email, password) VALUES (?, ?, ?)", (useraname, email, password))
+        cursor.execute("INSERT INTO local_users (username, email, password, logged, active) VALUES (?, ?, ?, ?, ?)", (useraname, email, password, True, True))
         conn.commit()
         conn.close()
         return True
@@ -85,7 +80,7 @@ def get_last_active_session():
     result_username = cursor.fetchone()
     conn.close()
     if result_email:
-        return result_username, result_email    # Retorna el nombre de usuario y el correo
+        return result_username[0], result_email[0]    # Retorna el nombre de usuario y el correo
     else:
         return None, None #No hay sesión activa, devuelve None para activar modo guest
     
