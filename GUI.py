@@ -325,10 +325,11 @@ class AccountScreen(tk.Frame):
 
 
 class Application(tk.Tk):
+    global username, email
     def __init__(self):
         super().__init__()
-        self.current_user = None
-        self.current_email = None
+        self.current_user = username
+        self.current_email = email
         ###Configuración de Ventana###
         self.title("Artemisa")
         width = self.winfo_screenwidth()
@@ -375,6 +376,7 @@ class Application(tk.Tk):
 if __name__ == "__main__":
     ###Confirmar creación de DB al iniciar la aplicación###
     local_db.init_db()
+    global username, email
     ###Obtener el nombre de usuario y correo de la última cuenta activa, si es que hay una###
     username, email = local_db.get_last_active_session()
     if username:

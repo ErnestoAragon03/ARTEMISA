@@ -24,6 +24,6 @@ Recursos/
 Wake_Words/LICENSE.txt
 
 #Ignorar archivos temporales para el ASR
-temp_audio.wav
+ASR/Online/Temp
 
 .Secret
