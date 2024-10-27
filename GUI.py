@@ -271,6 +271,7 @@ class AccountScreen(tk.Frame):
             self.app.current_email = email
             self.show_profile(username=username, email=email)
             local_db.update_session(email)
+            self.app.clearHome()
         else:
             messagebox.showerror("Error", "Email o contraseña incorrectos")
 
@@ -368,9 +369,13 @@ class Application(tk.Tk):
         self.current_email = None
         messagebox.showerror("Sesión cerrada", "Se ha cerrado la sesión, vuelve pronto.  Pasando al modo guest.")
         local_db.update_session(email=None)
+        self.clearHome()
+        self.show_frame(HomeScreen)
+
+    ###Función para limpiar Home###
+    def clearHome(self):
         home_screen = self.frames[HomeScreen]
         home_screen.reset_transcriptions()
-        self.show_frame(HomeScreen)
 
     ###Función para terminar todos los procesos al cerrar la aplicación###
     def on_closing(self):
