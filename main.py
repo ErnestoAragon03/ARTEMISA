@@ -15,19 +15,22 @@ running = True
 conversation_active = False
 tts_interrupted = False
 recognized_text = None
-
+alredy_alerted_Disconnection = False
+alredy_alerted_Connection = True
 def main():
-    global context, running, conversation_active, recognized_text, tts_interrupted, app_instance
+    global context, running, conversation_active, recognized_text, tts_interrupted, app_instance, alredy_alerted_Connection, alredy_alerted_Disconnection
     while running:
         recognized_text = None
         if conversation_active & GUI.mic_active:
             #Seleccionar modelo online o local
             if check_internet_connection():
+            ### Levantar un anuncio indicando que se recuperó la conexión (Solo si aplica)###
+                alert_Connection()
             ### ASR en línea ###
                 recognized_text = transcribe()
             else:
             ### Levantar un anuncio indicando que se perdió la conexión###
-                app_instance.master.alert_disconnection()
+                alert_No_Connection()
             ### ASR local ###
                 recognized_text = start_asr_local(app_instance) 
             
@@ -38,6 +41,8 @@ def main():
             if awaked:
                 #Seleccionar modelo online o local
                 if check_internet_connection():
+                ### Levantar un anuncio indicando que se recuperó la conexión (Solo si aplica)###
+                    alert_Connection()
                 ### ASR en línea ###
                     recognized_text = transcribe()
                 else:
@@ -76,11 +81,13 @@ def process_text(recognized_text, app_instance):
         ###Procesamiento con LLM###
         ### Seleccionar modelo online o local
         if check_internet_connection():
+        ### Levantar un anuncio indicando que se recuperó la conexión (Solo si aplica)###
+            alert_Connection()
         ### LLM Online ###
             response = ask_to_openai(recognized_text)
         else:
         ### Levantar un anuncio indicando que se perdió la conexión###
-            app_instance.master.alert_disconnection()
+            alert_No_Connection()
         ### LLM local ###
             initial_context = """El proyecto ARTEMISA es un asistente que utiliza modelos de lenguaje para responder a preguntas  
             Yo soy el proyecto ARTEMISA
@@ -106,12 +113,14 @@ def process_response(llm_response, app_instance):
     ### Procesamiento de la respuesta de LLM con el modelo TTS ###
     ### Seleccionar modelo online o local ###
     if check_internet_connection():
+    ### Levantar un anuncio indicando que se recuperó la conexión (Solo si aplica)###
+        alert_Connection()
     ### TTS Online###
         tts_thread = threading.Thread(target=generate_audio_OpenAI, args=(llm_response,))
         tts_thread.start()
     else:
     ### Levantar un anuncio indicando que se perdió la conexión###
-        app_instance.master.alert_disconnection()
+        alert_No_Connection()
     ### TTS Local###
         generate_audio(llm_response, tts_model)
 
@@ -121,8 +130,18 @@ def interrupt_tts():
     tts_interrupted = True
 
 def alert_No_Connection():
-    global app_instance
-    app_instance.master.alert_disconnection()
+    global app_instance, alredy_alerted_Disconnection, alredy_alerted_Connection
+    if not alredy_alerted_Disconnection:
+        app_instance.master.alert_disconnection()
+        alredy_alerted_Disconnection = True
+        alredy_alerted_Connection = False
+
+def alert_Connection():
+    global app_instance, alredy_alerted_Connection, alredy_alerted_Disconnection
+    if not alredy_alerted_Connection:
+        app_instance.master.alert_connection()
+        alredy_alerted_Connection = True
+        alredy_alerted_Disconnection = False
 
 def start_pipeline(starter_app_instance):
     local_db.init_db()

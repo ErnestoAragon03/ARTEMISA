@@ -372,8 +372,10 @@ class Application(tk.Tk):
         self.destroy()     #Cerrar la ventana
     
     def alert_disconnection(self):
-        messagebox.showerror("Sin conexión a Internet", "Actualmente se encuentra en modo desconectado, Artemisa se transformará a su versión offline...")
+        messagebox.showinfo("Sin conexión a Internet", "Actualmente se encuentra en modo desconectado, Artemisa se transformará a su versión offline...")
     
+    def alert_connection(self):
+        messagebox.showinfo("Conexión a Internet restablecida", "Se ha recuperado la conexión a Internet, Artemisa pasará al modo online")
 
 ###Configuración inicial de la ventana###
 if __name__ == "__main__":
