@@ -55,11 +55,8 @@ def process_voice_activity(data):
 #Captura el audio
 def capture_audio():
     global last_voice_time
-    print("recognized_text (Iniciando ASR): ", main.recognized_text)
     while cloud_tts.is_tts_playing:
-        print("Esperando a que el TTS termine")
         time.sleep(1)
-    print("recognized_text (Terminando TTS) ", main.recognized_text)
     #Reproducir sonido de activación
     play_activation_sound() 
     #Iniciar grabación

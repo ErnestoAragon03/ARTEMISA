@@ -22,7 +22,6 @@ def main(app_instance):
         if conversation_active & GUI.mic_active:
             #Iniciar el ASR en un hilo separado
             #recognized_text = start_asr_local(app_instance)   #QUIZÁS REQUIERA DEL USO DE HILOS EN PARALELO
-            recognized_text = None
             ###ASR en línea
             recognized_text = transcribe()
 
