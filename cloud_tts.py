@@ -2,7 +2,6 @@ from openai import OpenAI
 import sounddevice as sd
 import numpy as np
 import main
-import time
 
 client = OpenAI(
     #Configurar API key de OpenAI
@@ -11,12 +10,12 @@ client = OpenAI(
 
 is_tts_playing=False
 
-def generate_audio_OpenAI(input_text):
+def generate_audio_OpenAI(input_text, app):
     global is_tts_playing
     is_tts_playing = True
     response = client.audio.speech.create(
         model="tts-1",
-        voice="nova",
+        voice=app.master.current_voice.lower(),
         input=input_text,
         response_format="pcm"   #Usaremos formato pcm para poder reproducir el audio directamente
     )

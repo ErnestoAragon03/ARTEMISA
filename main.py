@@ -110,13 +110,14 @@ def process_text(recognized_text):
     return response
 
 def process_response(llm_response):
+    global app_instance
     ### Procesamiento de la respuesta de LLM con el modelo TTS ###
     ### Seleccionar modelo online o local ###
     if check_internet_connection():
     ### Levantar un anuncio indicando que se recuperó la conexión (Solo si aplica)###
         alert_Connection()
     ### TTS Online###
-        tts_thread = threading.Thread(target=generate_audio_OpenAI, args=(llm_response,))
+        tts_thread = threading.Thread(target=generate_audio_OpenAI, args=(llm_response, app_instance))
         tts_thread.start()
     else:
     ### Levantar un anuncio indicando que se perdió la conexión###

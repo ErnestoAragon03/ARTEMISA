@@ -33,7 +33,5 @@ def drop_important_data():
     conn.close()
 
 if __name__ == "__main__":
-    drop_session()
     drop_local_users()
     drop_recent_consults()
-    drop_important_data()
