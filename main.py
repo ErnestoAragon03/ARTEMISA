@@ -7,46 +7,51 @@ import GUI  #Interfaz gráfica
 from cloud_llm import ask_to_openai
 from cloud_tts import generate_audio_OpenAI
 from cloud_asr import transcribe
+import threading
 
 #Variable global que indica si se sigue ejecutando main
 running = True
 conversation_active = False
+tts_interrupted = False
+recognized_text = None
 
 def main(app_instance):
-    global context, running, conversation_active, recognized_text
+    global context, running, conversation_active, recognized_text, tts_interrupted
     while running:
+        recognized_text = None
         if conversation_active & GUI.mic_active:
             #Iniciar el ASR en un hilo separado
             #recognized_text = start_asr_local(app_instance)   #QUIZÁS REQUIERA DEL USO DE HILOS EN PARALELO
-
+            recognized_text = None
             ###ASR en línea
             recognized_text = transcribe()
 
-            print("recognized_text: ", recognized_text)
         else:
             awaked = wake_up.recognize_wake_word()
+            recognized_text = None
             #Iniciar el ASR en un hilo separado
             if awaked:
+                recognized_text = None
                 #recognized_text = start_asr_local(app_instance)
                 recognized_text = transcribe()
 
             
         if  GUI.mic_active: #Si el microfono estaba activo al momento de llegar
             if recognized_text:  #Si se ha detectado texto...
-                print(f"Texto detectado: {recognized_text}")
 
-                app_instance.transcribe(text=recognized_text, speaker='user')     #Pasa el texto capturado a la interfaz gráfica
+                app_instance.transcribe_GUI(text=recognized_text, speaker='user')     #Pasa el texto capturado a la interfaz gráfica
                 #Enviar a LLM
                 llm_response = process_text(recognized_text)
-                app_instance.transcribe(text=llm_response, speaker='assistant')
+                app_instance.transcribe_GUI(text=llm_response, speaker='assistant')
                 current_email = app_instance.master.current_email
                 print(current_email)
                 if current_email:
                     local_db.insertar_consulta(question=recognized_text, answer=llm_response, email=current_email)
-                recognized_text = ""  #Reiniciar despúes de procesar el texto y almacenar en la base de datos
+                recognized_text = None  #Reiniciar despúes de procesar el texto y almacenar en la base de datos
                 #Enviar a TTS
                 process_response(llm_response)
             else:
+                recognized_text = None
                 conversation_active = False
 
         else:
@@ -81,8 +86,13 @@ def process_text(recognized_text):
 def process_response(llm_response):
     #Procesamiento de la respuesta de LLM con el modelo TTS
     #generate_audio(llm_response, tts_model)
-    generate_audio_OpenAI(llm_response)
-    pass
+    tts_thread = threading.Thread(target=generate_audio_OpenAI, args=(llm_response,))
+    tts_thread.start()
+
+def interrupt_tts():
+    global recognized_text, tts_interrupted
+    recognized_text = None
+    tts_interrupted = True
 
 def start_pipeline(app_instance):
     local_db.init_db()

@@ -36,6 +36,9 @@ class HomeScreen(tk.Frame):
         ###Botón para enviar input de texto###
         send_button = tk.Button(botton_frame, text="Enviar", command=self.send_text)
         send_button.pack(side=tk.LEFT, padx=5)
+        ###Botón para terminar TTS ###
+        end_tts_button = tk.Button(botton_frame, text="Silenciar TTS", command=self.interrupt_tts)
+        end_tts_button.pack(side=tk.LEFT, padx=5)
         ###Botón ASR###
         self.mic_button = tk.Button(botton_frame, text="Desactivar Micrófono", command= self.toggle_mic)
         self.mic_button.pack(side=tk.LEFT, padx=5)
@@ -53,12 +56,16 @@ class HomeScreen(tk.Frame):
     def send_text(self, event=None):
         user_input = self.text_input.get()  #Obtener el texto ingresado
         if user_input:      #Solo en caso el texto no esté vacío            
-            self.transcribe(text=user_input, speaker="user")    #Transcripción del usuario
+            self.transcribe_GUI(text=user_input, speaker="user")    #Transcripción del usuario
             self.text_input.delete(0, tk.END)   #Limpiar el input de texto
 
             #Obtener respuesta del LLM
             response = main.process_text(user_input)
-            self.transcribe(text=response, speaker="assistant") #Transcribir la respuesta del LLM
+            self.transcribe_GUI(text=response, speaker="assistant") #Transcribir la respuesta del LLM
+
+    #Función para interrumpir al TTS
+    def interrupt_tts(self):
+        main.interrupt_tts()
 
     ###Función para iniciar el pipeline###
     def start_pipeline(self):
@@ -69,6 +76,7 @@ class HomeScreen(tk.Frame):
     ###Función para terminar el pipeline###
     def stop_pipeline(self):
         main.running = False
+        main.interrupt_tts()
         if self.pipeline_thread and self.pipeline_thread.is_alive():
             self.pipeline_thread.join()  #Esperar a que termine el thread
 
@@ -79,6 +87,7 @@ class HomeScreen(tk.Frame):
             mic_active = False
             self.mic_button.config(text="Activar Microfono")
             self.stop_pipeline()
+            main.recognized_text = ""
             print("muting...")
         else:
             mic_active = True
@@ -86,7 +95,7 @@ class HomeScreen(tk.Frame):
             self.start_pipeline()
     
     ###Función de Transcripción###
-    def transcribe(self, text, speaker):
+    def transcribe_GUI(self, text, speaker):
         self.transcription_area.config(state=tk.NORMAL) #Habilita la edición del text Widget
         if speaker == 'user':
             self.transcription_area.insert(tk.END, f"{text}\n", "user")    #Transcipción de lado del usuario
@@ -369,7 +378,7 @@ if __name__ == "__main__":
     ###Obtener el nombre de usuario y correo de la última cuenta activa, si es que hay una###
     username, email = local_db.get_last_active_session()
     if username:
-        print(f"Sesión ini  ciada en la cuenta {username}")
+        print(f"Sesión iniciada en la cuenta {username}")
     else:
         print("Modo guest")
 

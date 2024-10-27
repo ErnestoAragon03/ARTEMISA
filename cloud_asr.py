@@ -9,6 +9,8 @@ import io
 import tempfile
 import wave
 import main
+import cloud_tts
+import os
 
 from asr_sounds import play_activation_sound, play_deactivation_sound
 
@@ -52,9 +54,14 @@ def process_voice_activity(data):
 
 #Captura el audio
 def capture_audio():
-    global last_voice_time    
+    global last_voice_time
+    print("recognized_text (Iniciando ASR): ", main.recognized_text)
+    while cloud_tts.is_tts_playing:
+        print("Esperando a que el TTS termine")
+        time.sleep(1)
+    print("recognized_text (Terminando TTS) ", main.recognized_text)
     #Reproducir sonido de activación
-    play_activation_sound()
+    play_activation_sound() 
     #Iniciar grabación
     print("Artemisa está escuchando...")
     #Captura de audio
@@ -75,19 +82,18 @@ def capture_audio():
     play_deactivation_sound()
     print("Grabación terminada")
     audio_buffer.seek(0)    #Reiniciar Buffer
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_audio_file:
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False, dir=".\ASR\Online\Temp") as temp_audio_file:
         with wave.open(temp_audio_file, 'wb') as wf:
             wf.setnchannels(1)
             wf.setsampwidth(2)  # 2 bytes para int16
             wf.setframerate(samplerate)
             wf.writeframes(audio_buffer.read())
-
-    print("Cerró capture_audio")
-    return temp_audio_file.name
-
-def save_and_transcribe(temp_audio_file_name):
+        temp_audio_file_name = temp_audio_file.name
+    audio_buffer.truncate(0)
+    audio_buffer.seek(0)
     print("Llegó a save_and_transcribe")
-    #Enviar a Whisper
+    transcription_text = []
+        #Enviar a Whisper
     with open(temp_audio_file_name, "rb") as audio_file:
             transcription = client.audio.transcriptions.create(
                 model="whisper-1",
@@ -96,15 +102,25 @@ def save_and_transcribe(temp_audio_file_name):
             )
     transcription_text = transcription.text
     print("Texto final reconocido: ", transcription_text)
+    directory_path = "./ASR/Online/Temp/"
+    audio_file_path = os.path.join(directory_path, temp_audio_file_name)
+    print(audio_file_path)  
+    #Borrar el archivo temporal
+    if os.path.exists(audio_file_path):
+        os.remove(audio_file_path)
+        print(f"Archivo {audio_file_path} eliminado.")
+    else:
+        print("El archivo no existe.")
+
     if transcription_text:
         main.conversation_active = True
         return transcription_text
 
+
 def transcribe():
     transcription = ""
     try:
-        temp_audio_file_name = capture_audio()
-        transcription = save_and_transcribe(temp_audio_file_name=temp_audio_file_name)
+        transcription = capture_audio()
         return transcription
     except Exception as e:
         print("Error: ", e)
