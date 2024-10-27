@@ -3,6 +3,7 @@ import sounddevice as sd
 import numpy as np
 import queue
 import main
+from check_internet_connection import check_internet_connection
 
 #Configurar cola de audio
 q = queue.Queue()
@@ -27,6 +28,10 @@ def recognize_wake_word():
     with sd.InputStream(callback=constant_callback, channels=1, samplerate=porcupine.sample_rate, blocksize=porcupine.frame_length, dtype=dtype):
         print("Listening...")
         while main.running:
+            if check_internet_connection():
+                main.alert_Connection()
+            else:
+                main.alert_No_Connection()
             pcm = q.get().flatten()
             pcm = np.frombuffer(pcm, dtype=np.int16)
 
