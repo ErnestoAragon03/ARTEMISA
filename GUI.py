@@ -414,6 +414,7 @@ class Application(tk.Tk):
     def change_voice(self, new_voice):
         print(f"Cambiando voz a {new_voice}")
         local_db.change_voice(new_voice, self.current_email)
+        self.current_voice = new_voice
 
 
 ###Configuración inicial de la ventana###
