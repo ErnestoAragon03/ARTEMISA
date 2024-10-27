@@ -16,8 +16,8 @@ conversation_active = False
 tts_interrupted = False
 recognized_text = None
 
-def main(app_instance):
-    global context, running, conversation_active, recognized_text, tts_interrupted
+def main():
+    global context, running, conversation_active, recognized_text, tts_interrupted, app_instance
     while running:
         recognized_text = None
         if conversation_active & GUI.mic_active:
@@ -27,6 +27,7 @@ def main(app_instance):
                 recognized_text = transcribe()
             else:
             ### Levantar un anuncio indicando que se perdió la conexión###
+                app_instance.master.alert_disconnection()
             ### ASR local ###
                 recognized_text = start_asr_local(app_instance) 
             
@@ -41,6 +42,7 @@ def main(app_instance):
                     recognized_text = transcribe()
                 else:
                 ### Levantar un anuncio indicando que se perdió la conexión###
+                    app_instance.master.alert_disconnection()
                 ### ASR local ###
                     recognized_text = start_asr_local(app_instance) 
 
@@ -50,7 +52,7 @@ def main(app_instance):
                 ### Pasa el texto capturado a la interfaz gráfica ###
                 app_instance.transcribe_GUI(text=recognized_text, speaker='user')        
                 ### Enviar a LLM ###
-                llm_response = process_text(recognized_text)
+                llm_response = process_text(recognized_text, app_instance)
                 ### Pasar respuesta a interfaz gráfica ###
                 app_instance.transcribe_GUI(text=llm_response, speaker='assistant')
                 ### Obtener correo de usuario actual ###
@@ -59,7 +61,7 @@ def main(app_instance):
                     local_db.insertar_consulta(question=recognized_text, answer=llm_response, email=current_email)
                 recognized_text = None  #Reiniciar despúes de procesar el texto y almacenar en la base de datos
                 #Enviar a TTS
-                process_response(llm_response)
+                process_response(llm_response, app_instance)
             else:
                 recognized_text = None
                 conversation_active = False
@@ -69,7 +71,7 @@ def main(app_instance):
             break
             
 
-def process_text(recognized_text):
+def process_text(recognized_text, app_instance):
     try:
         ###Procesamiento con LLM###
         ### Seleccionar modelo online o local
@@ -78,6 +80,7 @@ def process_text(recognized_text):
             response = ask_to_openai(recognized_text)
         else:
         ### Levantar un anuncio indicando que se perdió la conexión###
+            app_instance.master.alert_disconnection()
         ### LLM local ###
             initial_context = """El proyecto ARTEMISA es un asistente que utiliza modelos de lenguaje para responder a preguntas  
             Yo soy el proyecto ARTEMISA
@@ -99,7 +102,7 @@ def process_text(recognized_text):
 
     return response
 
-def process_response(llm_response):
+def process_response(llm_response, app_instance):
     ### Procesamiento de la respuesta de LLM con el modelo TTS ###
     ### Seleccionar modelo online o local ###
     if check_internet_connection():
@@ -108,6 +111,7 @@ def process_response(llm_response):
         tts_thread.start()
     else:
     ### Levantar un anuncio indicando que se perdió la conexión###
+        app_instance.master.alert_disconnection()
     ### TTS Local###
         generate_audio(llm_response, tts_model)
 
@@ -116,14 +120,19 @@ def interrupt_tts():
     recognized_text = None
     tts_interrupted = True
 
-def start_pipeline(app_instance):
+def alert_No_Connection():
+    global app_instance
+    app_instance.master.alert_disconnection()
+
+def start_pipeline(starter_app_instance):
     local_db.init_db()
-    global llm_model, llm_tokenizer, tts_model
+    global llm_model, llm_tokenizer, tts_model, app_instance
+    app_instance = starter_app_instance
     #Inicializar el modelo LLM Flant-T5
     llm_model, llm_tokenizer = initialize_llm()
     #Inicializar el modelo TTS 
     tts_model = initialize_tts()
-    main(app_instance)
+    main()
 
 
 if __name__ == "__main__":

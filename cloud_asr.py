@@ -119,5 +119,7 @@ def transcribe():
     try:
         transcription = capture_audio()
         return transcription
+    except ConnectionError:
+        main.alert_No_Connection()
     except Exception as e:
         print("Error: ", e)
