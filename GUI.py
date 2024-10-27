@@ -36,6 +36,9 @@ class HomeScreen(tk.Frame):
         ###Botón para enviar input de texto###
         send_button = tk.Button(botton_frame, text="Enviar", command=self.send_text)
         send_button.pack(side=tk.LEFT, padx=5)
+        ###Botón para terminar TTS ###
+        end_tts_button = tk.Button(botton_frame, text="Silenciar TTS", command=self.interrupt_tts)
+        end_tts_button.pack(side=tk.LEFT, padx=5)
         ###Botón ASR###
         self.mic_button = tk.Button(botton_frame, text="Desactivar Micrófono", command= self.toggle_mic)
         self.mic_button.pack(side=tk.LEFT, padx=5)
@@ -53,12 +56,16 @@ class HomeScreen(tk.Frame):
     def send_text(self, event=None):
         user_input = self.text_input.get()  #Obtener el texto ingresado
         if user_input:      #Solo en caso el texto no esté vacío            
-            self.transcribe(text=user_input, speaker="user")    #Transcripción del usuario
+            self.transcribe_GUI(text=user_input, speaker="user")    #Transcripción del usuario
             self.text_input.delete(0, tk.END)   #Limpiar el input de texto
 
             #Obtener respuesta del LLM
             response = main.process_text(user_input)
-            self.transcribe(text=response, speaker="assistant") #Transcribir la respuesta del LLM
+            self.transcribe_GUI(text=response, speaker="assistant") #Transcribir la respuesta del LLM
+
+    #Función para interrumpir al TTS
+    def interrupt_tts(self):
+        main.interrupt_tts()
 
     ###Función para iniciar el pipeline###
     def start_pipeline(self):
@@ -69,6 +76,7 @@ class HomeScreen(tk.Frame):
     ###Función para terminar el pipeline###
     def stop_pipeline(self):
         main.running = False
+        main.interrupt_tts()
         if self.pipeline_thread and self.pipeline_thread.is_alive():
             self.pipeline_thread.join()  #Esperar a que termine el thread
 
@@ -79,6 +87,7 @@ class HomeScreen(tk.Frame):
             mic_active = False
             self.mic_button.config(text="Activar Microfono")
             self.stop_pipeline()
+            main.recognized_text = ""
             print("muting...")
         else:
             mic_active = True
@@ -86,13 +95,20 @@ class HomeScreen(tk.Frame):
             self.start_pipeline()
     
     ###Función de Transcripción###
-    def transcribe(self, text, speaker):
+    def transcribe_GUI(self, text, speaker):
         self.transcription_area.config(state=tk.NORMAL) #Habilita la edición del text Widget
         if speaker == 'user':
             self.transcription_area.insert(tk.END, f"{text}\n", "user")    #Transcipción de lado del usuario
         elif speaker=='assistant':
             self.transcription_area.insert(tk.END, f"{text}\n", "assistant")    #Transcipción de lado del asistente
         self.transcription_area.config(state=tk.DISABLED)
+
+    ###Función para limpiar el área de transcripciones
+    def reset_transcriptions(self):
+        self.transcription_area.config(state=tk.NORMAL) #Habilitar la edición del widget
+        self.transcription_area.delete("1.0", tk.END)
+        self.transcription_area.config(state=tk.DISABLED)
+        self.text_input.delete(0, tk.END)
 
 class AccountScreen(tk.Frame):
     def __init__(self, parent, app):
@@ -255,6 +271,7 @@ class AccountScreen(tk.Frame):
             self.app.current_email = email
             self.show_profile(username=username, email=email)
             local_db.update_session(email)
+            self.app.clearHome()
         else:
             messagebox.showerror("Error", "Email o contraseña incorrectos")
 
@@ -297,7 +314,7 @@ class AccountScreen(tk.Frame):
         patron = r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$" #Expresión regular
         print(re.match(patron, password))
         return re.match(patron, password) is None
-    ###Función para limpiar campos de login y register###
+    ###Función para limpiar campos de login, register y Home###
     def reset_fields(self):
         self.email_entry.delete(0, tk.END)
         self.password_entry.delete(0, tk.END)
@@ -316,10 +333,11 @@ class AccountScreen(tk.Frame):
 
 
 class Application(tk.Tk):
+    global username, email
     def __init__(self):
         super().__init__()
-        self.current_user = None
-        self.current_email = None
+        self.current_user = username
+        self.current_email = email
         ###Configuración de Ventana###
         self.title("Artemisa")
         width = self.winfo_screenwidth()
@@ -351,7 +369,13 @@ class Application(tk.Tk):
         self.current_email = None
         messagebox.showerror("Sesión cerrada", "Se ha cerrado la sesión, vuelve pronto.  Pasando al modo guest.")
         local_db.update_session(email=None)
+        self.clearHome()
         self.show_frame(HomeScreen)
+
+    ###Función para limpiar Home###
+    def clearHome(self):
+        home_screen = self.frames[HomeScreen]
+        home_screen.reset_transcriptions()
 
     ###Función para terminar todos los procesos al cerrar la aplicación###
     def on_closing(self):
@@ -366,10 +390,11 @@ class Application(tk.Tk):
 if __name__ == "__main__":
     ###Confirmar creación de DB al iniciar la aplicación###
     local_db.init_db()
+    global username, email
     ###Obtener el nombre de usuario y correo de la última cuenta activa, si es que hay una###
     username, email = local_db.get_last_active_session()
     if username:
-        print(f"Sesión ini  ciada en la cuenta {username}")
+        print(f"Sesión iniciada en la cuenta {username}")
     else:
         print("Modo guest")
 

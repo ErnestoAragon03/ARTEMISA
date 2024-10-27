@@ -1,41 +1,57 @@
-import asr  # Módulo ASR
-from llm import initialize_llm, generate_response  # Módulo LLM
-from tts import initialize_tts, generate_audio     # Módulo TTS
+from local_asr import start_asr_local                   # Módulo ASR
+from local_llm import initialize_llm, generate_response  # Módulo LLM
+from local_tts import initialize_tts, generate_audio     # Módulo TTS
 import wake_up  #Módulo de wake words
 import local_db #Módulo de la base de datos local
 import GUI  #Interfaz gráfica
+from cloud_llm import ask_to_openai
+from cloud_tts import generate_audio_OpenAI
+from cloud_asr import transcribe
+import threading
 
 #Variable global que indica si se sigue ejecutando main
 running = True
+conversation_active = False
+tts_interrupted = False
+recognized_text = None
 
 def main(app_instance):
-    global context, running
+    global context, running, conversation_active, recognized_text, tts_interrupted
     while running:
-        if asr.conversation_active & GUI.mic_active:
+        recognized_text = None
+        if conversation_active & GUI.mic_active:
             #Iniciar el ASR en un hilo separado
-            asr.start_asr_local(app_instance)   #QUIZÁS REQUIERA DEL USO DE HILOS EN PARALELO
+            #recognized_text = start_asr_local(app_instance)   #QUIZÁS REQUIERA DEL USO DE HILOS EN PARALELO
+            ###ASR en línea
+            recognized_text = transcribe()
+
         else:
-            #Esperar a que se active el microfono ESTO SE TIENE QUE CAMBIAR, MUY INEFICIENTE
-        #while not GUI.mic_active:
-                #NO hacer nada
-                #print("Mic Muted")
-            #Esperar wake word
             awaked = wake_up.recognize_wake_word()
+            recognized_text = None
             #Iniciar el ASR en un hilo separado
             if awaked:
-                asr.start_asr_local(app_instance)
+                recognized_text = None
+                #recognized_text = start_asr_local(app_instance)
+                recognized_text = transcribe()
+
             
         if  GUI.mic_active: #Si el microfono estaba activo al momento de llegar
-            if asr.recognized_text:  #Si se ha detectado texto...
-                print(f"Texto detectado: {asr.recognized_text}")
+            if recognized_text:  #Si se ha detectado texto...
+
+                app_instance.transcribe_GUI(text=recognized_text, speaker='user')     #Pasa el texto capturado a la interfaz gráfica
                 #Enviar a LLM
-                llm_response = process_text(asr.recognized_text)
-                app_instance.transcribe(text=llm_response, speaker='assistant')
+                llm_response = process_text(recognized_text)
+                app_instance.transcribe_GUI(text=llm_response, speaker='assistant')
+                current_email = app_instance.master.current_email
+                print(current_email)
+                if current_email:
+                    local_db.insertar_consulta(question=recognized_text, answer=llm_response, email=current_email)
+                recognized_text = None  #Reiniciar despúes de procesar el texto y almacenar en la base de datos
                 #Enviar a TTS
                 process_response(llm_response)
-                asr.recognized_text = ""  #Reiniciar despúes de procesar el texto
             else:
-                asr.conversation_active = False
+                recognized_text = None
+                conversation_active = False
 
         else:
             print("Terminando Pipeline")
@@ -50,12 +66,14 @@ def process_text(recognized_text):
         Nombres: Rebecca
         Usuario Actual: Aragón
         Información: Aragón es el usuario actual"""
-        response, context = generate_response(recognized_text, initial_context, llm_model, llm_tokenizer)
+        #response, context = generate_response(recognized_text, initial_context, llm_model, llm_tokenizer)
+        response = ask_to_openai(recognized_text)
         #Verificar que la respuesta no esté vacía
-        if not response or response.strip() == "" or response == '[CLS]':
+        print("RESPUESTA QUE REGRESÓ:", response)
+        if not response or response == '[CLS]':
             raise ValueError("La respuesta del LLM está vacía")    
         print(f"Respuesta del LLM: {response}")
-        print(f"Contexto: {context}")
+        #print(f"Contexto: {context}")
     except ValueError as ve:
         print(f"Error en la respuesta del LLM: {ve}")
         response = "Hubo un error en la respuesta, intentelo nuevamente"
@@ -66,8 +84,14 @@ def process_text(recognized_text):
 
 def process_response(llm_response):
     #Procesamiento de la respuesta de LLM con el modelo TTS
-    generate_audio(llm_response, tts_model)
-    pass
+    #generate_audio(llm_response, tts_model)
+    tts_thread = threading.Thread(target=generate_audio_OpenAI, args=(llm_response,))
+    tts_thread.start()
+
+def interrupt_tts():
+    global recognized_text, tts_interrupted
+    recognized_text = None
+    tts_interrupted = True
 
 def start_pipeline(app_instance):
     local_db.init_db()
