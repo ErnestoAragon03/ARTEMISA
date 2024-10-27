@@ -62,6 +62,7 @@ class HomeScreen(tk.Frame):
             #Obtener respuesta del LLM
             response = main.process_text(user_input)
             self.transcribe_GUI(text=response, speaker="assistant") #Transcribir la respuesta del LLM
+            local_db.insertar_consulta(question=user_input, answer=response, email=app.current_email)
 
     #Función para interrumpir al TTS
     def interrupt_tts(self):

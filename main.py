@@ -57,7 +57,7 @@ def main():
                 ### Pasa el texto capturado a la interfaz gráfica ###
                 app_instance.transcribe_GUI(text=recognized_text, speaker='user')        
                 ### Enviar a LLM ###
-                llm_response = process_text(recognized_text, app_instance)
+                llm_response = process_text(recognized_text)
                 ### Pasar respuesta a interfaz gráfica ###
                 app_instance.transcribe_GUI(text=llm_response, speaker='assistant')
                 ### Obtener correo de usuario actual ###
@@ -66,7 +66,7 @@ def main():
                     local_db.insertar_consulta(question=recognized_text, answer=llm_response, email=current_email)
                 recognized_text = None  #Reiniciar despúes de procesar el texto y almacenar en la base de datos
                 #Enviar a TTS
-                process_response(llm_response, app_instance)
+                process_response(llm_response)
             else:
                 recognized_text = None
                 conversation_active = False
@@ -76,7 +76,7 @@ def main():
             break
             
 
-def process_text(recognized_text, app_instance):
+def process_text(recognized_text):
     try:
         ###Procesamiento con LLM###
         ### Seleccionar modelo online o local
@@ -109,7 +109,7 @@ def process_text(recognized_text, app_instance):
 
     return response
 
-def process_response(llm_response, app_instance):
+def process_response(llm_response):
     ### Procesamiento de la respuesta de LLM con el modelo TTS ###
     ### Seleccionar modelo online o local ###
     if check_internet_connection():

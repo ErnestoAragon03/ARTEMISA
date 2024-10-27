@@ -29,10 +29,8 @@ def recognize_wake_word():
         print("Listening...")
         while main.running:
             if check_internet_connection():
-                print("Si está checando")
                 main.alert_Connection()
             else:
-                print("Si está checando, ya hasta entró en alert")
                 main.alert_No_Connection()
             pcm = q.get().flatten()
             pcm = np.frombuffer(pcm, dtype=np.int16)
