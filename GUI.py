@@ -103,6 +103,13 @@ class HomeScreen(tk.Frame):
             self.transcription_area.insert(tk.END, f"{text}\n", "assistant")    #Transcipción de lado del asistente
         self.transcription_area.config(state=tk.DISABLED)
 
+    ###Función para limpiar el área de transcripciones
+    def reset_transcriptions(self):
+        self.transcription_area.config(state=tk.NORMAL) #Habilitar la edición del widget
+        self.transcription_area.delete("1.0", tk.END)
+        self.transcription_area.config(state=tk.DISABLED)
+        self.text_input.delete(0, tk.END)
+
 class AccountScreen(tk.Frame):
     def __init__(self, parent, app):
         super().__init__(parent)
@@ -306,7 +313,7 @@ class AccountScreen(tk.Frame):
         patron = r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$" #Expresión regular
         print(re.match(patron, password))
         return re.match(patron, password) is None
-    ###Función para limpiar campos de login y register###
+    ###Función para limpiar campos de login, register y Home###
     def reset_fields(self):
         self.email_entry.delete(0, tk.END)
         self.password_entry.delete(0, tk.END)
@@ -361,6 +368,8 @@ class Application(tk.Tk):
         self.current_email = None
         messagebox.showerror("Sesión cerrada", "Se ha cerrado la sesión, vuelve pronto.  Pasando al modo guest.")
         local_db.update_session(email=None)
+        home_screen = self.frames[HomeScreen]
+        home_screen.reset_transcriptions()
         self.show_frame(HomeScreen)
 
     ###Función para terminar todos los procesos al cerrar la aplicación###
