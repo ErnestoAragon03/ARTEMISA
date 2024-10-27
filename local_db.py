@@ -9,6 +9,7 @@ def init_db():
                    email TEXT NOT NULL PRIMARY KEY,
                    username TEXT NOT NULL,
                    password TEXT NOT NULL,
+                   voice TEXT,
                    logged BOOLEAN,
                    active BOOLEAN)''')
     
@@ -55,7 +56,7 @@ def add_user(useraname, email, password):
     try:
         conn = sqlite3.connect('artemisa_local_db')
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO local_users (username, email, password, logged, active) VALUES (?, ?, ?, ?, ?)", (useraname, email, password, True, True))
+        cursor.execute("INSERT INTO local_users (username, email, password, voice, logged, active) VALUES (?, ?, ?, ?, ?, ?)", (useraname, email, password, "Nova", True, True))
         conn.commit()
         conn.close()
         return True
@@ -70,7 +71,7 @@ def authenticate_user(email, password):
     conn.close()
     return user is not None
 
-###Obtener el correo y username de la última sesión activa###
+###Obtener el correo, username y voice de la última sesión activa###
 def get_last_active_session():
     conn = sqlite3.connect('artemisa_local_db')
     cursor  = conn.cursor()
@@ -79,11 +80,13 @@ def get_last_active_session():
     result_email = cursor.fetchone()
     cursor.execute("SELECT username FROM local_users WHERE logged = TRUE")
     result_username = cursor.fetchone()
+    cursor.execute("SELECT voice FROM local_users WHERE logged = TRUE")
+    voice = cursor.fetchone()
     conn.close()
     if result_email:
-        return result_username[0], result_email[0]    # Retorna el nombre de usuario y el correo
+        return result_username[0], result_email[0], voice[0]     # Retorna el nombre de usuario, el correo y la voz preferida
     else:
-        return None, None #No hay sesión activa, devuelve None para activar modo guest
+        return None, None, 'Nova' #No hay sesión activa, devuelve None para activar modo guest, devuelve la voz "Nova" como default
     
 def update_session(email=None):
     conn = sqlite3.connect('artemisa_local_db')
@@ -106,3 +109,20 @@ def get_user(email):
     username = cursor.fetchone()
     conn.close()
     return username[0]
+
+#Obtener voz ya seleccionada
+def get_voice(email):
+    conn = sqlite3.connect('artemisa_local_db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT voice FROM local_users WHERE email=(?)", (email,))
+    voice = cursor.fetchone()
+    conn.close()
+    return voice[0]
+
+#Cambiar la voz seleccionada
+def change_voice(voice,email):
+    conn = sqlite3.connect('artemisa_local_db')
+    cursor = conn.cursor()
+    cursor.execute("UPDATE local_users SET voice=(?) WHERE email=(?)", (voice, email))
+    conn.commit()
+    conn.close()

@@ -121,8 +121,8 @@ class AccountScreen(tk.Frame):
         self.register_screen = self.init_register_screen()
         self.profile_screen = self.init_profile_screen()
 
-        #Por el momento se muestra Login por default
-        username, email = local_db.get_last_active_session()
+        username, email, voice = local_db.get_last_active_session()
+        #Mostrar profile si hay sesión activa, si no login
         if username:
             self.show_profile(username=username, email=email)
         else:
@@ -220,8 +220,21 @@ class AccountScreen(tk.Frame):
         title_label.pack(pady=10)
 
         #Mostrar nombre de usuario
-        self.user_label = tk.Label(frame, text="Usuario:")
+        self.user_label = tk.Label(frame, text="Usuario: ")
         self.user_label.pack(pady=5)
+
+        #Mostrar email
+        self.email_label = tk.Label(frame, text="Email: ")
+        self.email_label.pack(pady=5)
+
+        #Obtion Menu para mostrar voces#
+        self.selected_voice = tk.StringVar(self)
+        self.selected_voice.set(self.app.current_voice) #Opción default
+        
+        voices = ["Nova", "Alloy", "Echo", "Fable", "Onyx", "Shimmer"]
+        self.dropdown = tk.OptionMenu(frame, self.selected_voice, *voices, command=self.app.change_voice)
+        self.dropdown.pack(pady=10)
+
 
         #Botón de cierre de sesión
         logout_btn = tk.Button(frame, text="Cerrar Sesión", command=self.logout)
@@ -244,6 +257,7 @@ class AccountScreen(tk.Frame):
     def show_profile(self, username, email):
         self.clear_frame()
         self.user_label.config(text=f"Usuario: {username}")
+        self.email_label.config(text=f"Email: {email}")
         self.profile_screen.pack()
 
     #Función para limpiar la pantalla de subpantallas
@@ -268,8 +282,10 @@ class AccountScreen(tk.Frame):
         elif local_db.authenticate_user(email, password):
             messagebox.showinfo("Éxito", "¡Sesión iniciada exitosamente!")
             username = local_db.get_user(email=email)
+            voice = local_db.get_voice(email=email)
             self.app.current_user = username
             self.app.current_email = email
+            self.app.current_voice = voice
             self.show_profile(username=username, email=email)
             local_db.update_session(email)
             self.app.clearHome()
@@ -300,6 +316,7 @@ class AccountScreen(tk.Frame):
             messagebox.showinfo("Éxito", "¡Cuenta creada exitosamente!")
             self.app.current_user = username
             self.app.current_email = email
+            self.app.current_voice = 'nova'
             self.show_profile(username=username, email=email)
         else:
             messagebox.showerror("Error", "Ya hay una cuenta asociada con ese email")
@@ -334,11 +351,12 @@ class AccountScreen(tk.Frame):
 
 
 class Application(tk.Tk):
-    global username, email
+    global username, email, voice
     def __init__(self):
         super().__init__()
         self.current_user = username
         self.current_email = email
+        self.current_voice = voice
         ###Configuración de Ventana###
         self.title("Artemisa")
         width = self.winfo_screenwidth()
@@ -368,6 +386,7 @@ class Application(tk.Tk):
     def logout(self):
         self.current_user = None
         self.current_email = None
+        self.current_voice = 'nova'
         messagebox.showerror("Sesión cerrada", "Se ha cerrado la sesión, vuelve pronto.  Pasando al modo guest.")
         local_db.update_session(email=None)
         self.clearHome()
@@ -392,13 +411,18 @@ class Application(tk.Tk):
     def alert_connection(self):
         messagebox.showinfo("Conexión a Internet restablecida", "Se ha recuperado la conexión a Internet, Artemisa pasará al modo online")
 
+    def change_voice(self, new_voice):
+        print(f"Cambiando voz a {new_voice}")
+        local_db.change_voice(new_voice, self.current_email)
+
+
 ###Configuración inicial de la ventana###
 if __name__ == "__main__":
     ###Confirmar creación de DB al iniciar la aplicación###
     local_db.init_db()
     global username, email
     ###Obtener el nombre de usuario y correo de la última cuenta activa, si es que hay una###
-    username, email = local_db.get_last_active_session()
+    username, email, voice = local_db.get_last_active_session()
     if username:
         print(f"Sesión iniciada en la cuenta {username}")
     else:
