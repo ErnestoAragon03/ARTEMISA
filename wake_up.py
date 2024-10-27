@@ -29,6 +29,7 @@ def recognize_wake_word():
         print("Listening...")
         while main.running:
             if check_internet_connection():
+                print("Está checando")
                 main.alert_Connection()
             else:
                 main.alert_No_Connection()
