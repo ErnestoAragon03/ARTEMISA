@@ -76,6 +76,7 @@ def process_text(recognized_text):
         else:
         ### LLM local ###
             contexto = local_db.recuperar_contexto(app_instance.master.current_email)
+            print("CONTEXTO: ", contexto)
             response= generate_response(recognized_text, contexto, llm_model, llm_tokenizer)
 
         ### Verificar que la respuesta no esté vacía ###

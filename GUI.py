@@ -18,10 +18,22 @@ class HomeScreen(tk.Frame):
         
         self.pipeline_thread = None
         self.start_pipeline()
-        
+        ###Frame para contener toda el área de transcripciones###
+        self.transcription_frame = tk.Frame(self)
+        self.transcription_frame.pack(pady=10)
+
         ###Campo para mostrar Transcripciones###
-        self.transcription_area = tk.Text(self, height=15, width=50, state=tk.DISABLED, wrap=tk.WORD)
-        self.transcription_area.pack(pady=10)
+        self.transcription_area = tk.Text(self.transcription_frame, height=30, width=100, state=tk.DISABLED, wrap="word")
+        self.transcription_area.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        ###Scrollbar para el área de transcripciones###
+        self.scrollbar = tk.Scrollbar(self.transcription_frame, command=self.transcription_area.yview)
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.transcription_area.config(yscrollcommand=self.scrollbar.set)
+
+        self.transcription_area.see("end") 
+
         ###Estilos del texto##
         self.transcription_area.tag_configure("user", foreground="blue", justify='right')   #Transcripción del usuario
         self.transcription_area.tag_configure("assigstant", foreground="green", justify='left')  #Respuesta del Asistente
@@ -292,6 +304,8 @@ class AccountScreen(tk.Frame):
             self.show_profile(username=username, email=email)
             local_db.update_session(email)
             self.app.clearHome()
+             ###Reconsturir la conversación anterior###
+            self.app.reconstruct_conversation()
         else:
             messagebox.showerror("Error", "Email o contraseña incorrectos")
 
@@ -436,6 +450,8 @@ class Application(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")  
 
         self.show_frame(HomeScreen)   #Se inicia en la pantalla principal
+        ###Reconsturir la conversación anterior###
+        self.reconstruct_conversation() 
 
         ###Vincular el cierre de la ventana con la función on_closing (para terminar todos los procesos)
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -481,7 +497,18 @@ class Application(tk.Tk):
         local_db.change_voice(new_voice, self.current_email)
         self.current_voice = new_voice
 
+    ###Función para reconstruir la conversación del usuaro###
+    def reconstruct_conversation(self):
+        home_screen = self.frames[HomeScreen]
+        questions = local_db.get_questions(self.current_email)
+        answers = local_db.get_answers(self.current_email)
 
+        #Intercalar y transcribir conversaciones
+        for question, answer in zip(questions, answers):
+            home_screen.transcribe_GUI(question[0], "user")
+            home_screen.transcribe_GUI(answer[0], "assistant")
+        
+        home_screen.transcription_area.see("end") 
 ###Configuración inicial de la ventana###
 if __name__ == "__main__":
     ###Confirmar creación de DB al iniciar la aplicación###
