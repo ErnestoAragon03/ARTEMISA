@@ -14,18 +14,26 @@ def initialize_llm():
 
 #Obtener respuesta del modelo
 def generate_response(question, context, model, tokenizer):
-    #Establecer un token de padding
-    #tokenizer.pad_token_id = tokenizer.eos_token_id
+    max_length = 512    #Longitud máxima de tokens para el modelo
+    inputs = tokenizer(question, context, return_tensors="pt", truncation=True, max_length=max_length)
+
+    #Realizar predicción
+    with torch.no_grad():
+        outputs = model(**inputs)
+
+    answer_start = torch.argmax(outputs.start_logits)
+    answer_end = torch.argmax(outputs.end_logits) + 1
+    answer = tokenizer.convert_tokens_to_string(tokenizer.convert_ids_to_tokens(inputs["input_ids"][0][answer_start:answer_end]))
+
     #Codificar el texto de entrada
-    inputs = tokenizer.encode_plus(question, context, return_tensors="pt")
-    inputs_ids = inputs["input_ids"].tolist()[0]
+    #inputs = tokenizer.encode_plus(question, context, return_tensors="pt")
+    #inputs_ids = inputs["input_ids"].tolist()[0]
     #Crear máscara de atención, esto evita confusión entre pad y eos token
     #attention_mask = inputs.ne(tokenizer.pad_token_id).long()
     #Generar la respuesta del modelo, pasar la atención
-    outputs = model(**inputs)
-    answer_start = torch.argmax(outputs.start_logits)
-    answer_end = torch.argmax(outputs.end_logits) + 1
+    #outputs = model(**inputs)
+    #answer_start = torch.argmax(outputs.start_logits)
+    #answer_end = torch.argmax(outputs.end_logits) + 1
     #Decodificar la respuesta a texto y devolverla
-    answer = tokenizer.convert_tokens_to_string(tokenizer.convert_ids_to_tokens(inputs_ids[answer_start:answer_end]))
-    context = local_db.recuperar_contexto()
-    return answer, context
+    #answer = tokenizer.convert_tokens_to_string(tokenizer.convert_ids_to_tokens(inputs_ids[answer_start:answer_end]))
+    return answer

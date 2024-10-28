@@ -76,12 +76,9 @@ def process_text(recognized_text):
             response = ask_to_openai(recognized_text)
         else:
         ### LLM local ###
-            initial_context = """El proyecto ARTEMISA es un asistente que utiliza modelos de lenguaje para responder a preguntas  
-            Yo soy el proyecto ARTEMISA
-            Nombres: Rebecca
-            Usuario Actual: Aragón
-            Información: Aragón es el usuario actual"""
-            response, context = generate_response(recognized_text, initial_context, llm_model, llm_tokenizer)
+            contexto = local_db.recuperar_contexto(app_instance.master.current_email)
+            print("Contexto: ", contexto)
+            response= generate_response(recognized_text, contexto, llm_model, llm_tokenizer)
 
         ### Verificar que la respuesta no esté vacía ###
         if not response or response == '[CLS]':
