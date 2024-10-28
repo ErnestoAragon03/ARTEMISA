@@ -4,6 +4,7 @@ from threading import Thread
 import main
 import local_db
 import re
+from check_internet_connection import InternetChecker
 
 mic_active = True
 
@@ -351,7 +352,9 @@ class AccountScreen(tk.Frame):
 
 
 class Application(tk.Tk):
-    global username, email, voice
+    global username, email, voice, internet_checker
+    ###Verificador de conexión###
+    internet_checker = InternetChecker()
     def __init__(self):
         super().__init__()
         self.current_user = username
@@ -399,18 +402,20 @@ class Application(tk.Tk):
 
     ###Función para terminar todos los procesos al cerrar la aplicación###
     def on_closing(self):
-        home_screen = self.frames[HomeScreen] #Acceder a HomeScreen desde el diccionario de Frames
+        global internet_checker
+        ### Acceder a HomeScreen desde el diccionario de Frames ###
+        home_screen = self.frames[HomeScreen] 
         if hasattr(home_screen, 'stop_pipeline'):
             print("Deteniendo Pipeline actual")
             home_screen.stop_pipeline()
-        self.destroy()     #Cerrar la ventana
-    
-    def alert_disconnection(self):
-        messagebox.showinfo("Sin conexión a Internet", "Actualmente se encuentra en modo desconectado, Artemisa se transformará a su versión offline...")
-    
-    def alert_connection(self):
-        messagebox.showinfo("Conexión a Internet restablecida", "Se ha recuperado la conexión a Internet, Artemisa pasará al modo online")
 
+        ### Detener el verificador de conexión ###
+        internet_checker.stop_checking()
+
+        ### Cerrar la ventana ###
+        self.destroy()
+
+    ###Función para cambiar la voz seleccionada###
     def change_voice(self, new_voice):
         print(f"Cambiando voz a {new_voice}")
         local_db.change_voice(new_voice, self.current_email)
@@ -430,4 +435,5 @@ if __name__ == "__main__":
         print("Modo guest")
 
     app = Application()
+    internet_checker.stop_checking()
     app.mainloop()
