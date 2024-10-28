@@ -18,10 +18,22 @@ class HomeScreen(tk.Frame):
         
         self.pipeline_thread = None
         self.start_pipeline()
-        
+        ###Frame para contener toda el área de transcripciones###
+        self.transcription_frame = tk.Frame(self)
+        self.transcription_frame.pack(pady=10)
+
         ###Campo para mostrar Transcripciones###
-        self.transcription_area = tk.Text(self, height=15, width=50, state=tk.DISABLED, wrap=tk.WORD)
-        self.transcription_area.pack(pady=10)
+        self.transcription_area = tk.Text(self.transcription_frame, height=30, width=100, state=tk.DISABLED, wrap="word")
+        self.transcription_area.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        ###Scrollbar para el área de transcripciones###
+        self.scrollbar = tk.Scrollbar(self.transcription_frame, command=self.transcription_area.yview)
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.transcription_area.config(yscrollcommand=self.scrollbar.set)
+
+        self.transcription_area.see("end") 
+
         ###Estilos del texto##
         self.transcription_area.tag_configure("user", foreground="blue", justify='right')   #Transcripción del usuario
         self.transcription_area.tag_configure("assigstant", foreground="green", justify='left')  #Respuesta del Asistente
@@ -59,7 +71,9 @@ class HomeScreen(tk.Frame):
             #Obtener respuesta del LLM
             response = main.process_text(user_input)
             self.transcribe_GUI(text=response, speaker="assistant") #Transcribir la respuesta del LLM
-            local_db.insertar_consulta(question=user_input, answer=response, email=app.current_email)
+            #Guardar la consulta únicamente si la respuesta no fue un error
+            if response != "Hubo un error inesperado, intentelo nuevamente" and response != "Hubo un error en la respuesta, intentelo nuevamente":
+                local_db.insertar_consulta(question=user_input, answer=response, email=app.current_email)
 
     #Función para interrumpir al TTS
     def interrupt_tts(self):
@@ -290,6 +304,8 @@ class AccountScreen(tk.Frame):
             self.show_profile(username=username, email=email)
             local_db.update_session(email)
             self.app.clearHome()
+             ###Reconsturir la conversación anterior###
+            self.app.reconstruct_conversation()
         else:
             messagebox.showerror("Error", "Email o contraseña incorrectos")
 
@@ -324,14 +340,10 @@ class AccountScreen(tk.Frame):
 
     ###Funciones de validación de campos ###
     def validate_email(self, email):
-        print("EMAIL: ", email)
         patron = r"^[\w\.-]+@[\w\.-]+\.\w+$"    #Expresión regular
-        print(re.match(patron, email))
         return re.match(patron, email) is None
     def validate_password(self, password):
-        print("PASSWORD: ", password)
         patron = r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$" #Expresión regular
-        print(re.match(patron, password))
         return re.match(patron, password) is None
     ###Función para limpiar campos de login, register y Home###
     def reset_fields(self):
@@ -438,6 +450,8 @@ class Application(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")  
 
         self.show_frame(HomeScreen)   #Se inicia en la pantalla principal
+        ###Reconsturir la conversación anterior###
+        self.reconstruct_conversation() 
 
         ###Vincular el cierre de la ventana con la función on_closing (para terminar todos los procesos)
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -480,11 +494,21 @@ class Application(tk.Tk):
 
     ###Función para cambiar la voz seleccionada###
     def change_voice(self, new_voice):
-        print(f"Cambiando voz a {new_voice}")
         local_db.change_voice(new_voice, self.current_email)
         self.current_voice = new_voice
 
+    ###Función para reconstruir la conversación del usuaro###
+    def reconstruct_conversation(self):
+        home_screen = self.frames[HomeScreen]
+        questions = local_db.get_questions(self.current_email)
+        answers = local_db.get_answers(self.current_email)
 
+        #Intercalar y transcribir conversaciones
+        for question, answer in zip(questions, answers):
+            home_screen.transcribe_GUI(question[0], "user")
+            home_screen.transcribe_GUI(answer[0], "assistant")
+        
+        home_screen.transcription_area.see("end") 
 ###Configuración inicial de la ventana###
 if __name__ == "__main__":
     ###Confirmar creación de DB al iniciar la aplicación###
@@ -492,10 +516,6 @@ if __name__ == "__main__":
     global username, email
     ###Obtener el nombre de usuario y correo de la última cuenta activa, si es que hay una###
     username, email, voice = local_db.get_last_active_session()
-    if username:
-        print(f"Sesión iniciada en la cuenta {username}")
-    else:
-        print("Modo guest")
 
     app = Application()
     internet_checker.stop_checking()

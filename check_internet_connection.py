@@ -37,7 +37,6 @@ class InternetChecker:
             time.sleep(5)
 
     def show_connection_status(self):
-        print("Advirtió aquí")
         #Mostrar mensaje de desconexión o reconexión
         if self.internet_status:
             messagebox.showinfo("Conexión reestablecida", "Se ha recuperado la conexión a Internet, Artemisa pasará al modo online")

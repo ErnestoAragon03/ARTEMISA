@@ -29,27 +29,40 @@ def insertar_consulta(question, answer, email):
     conn.commit()
     conn.close()
 
-def recuperar_contexto(consults_limit=10):
+def recuperar_contexto(email):
     conn = sqlite3.connect('artemisa_local_db')
     cursor = conn.cursor()
 
     #Recuperar consultas recientes
-    cursor.execute("SELECT question, answer FROM recent_consults ORDER BY timestamp DESC LIMIT ?", (consults_limit,))
-    recent_consults = [{'question': row[0], 'answer': row[1]} for row in cursor.fetchall()]
-
-    #Recuperar datos importantes
-    cursor.execute("SELECT key, value FROM important_data")
-    important_data = {row[0]: row[1] for row in cursor.fetchall()}
+    cursor.execute("SELECT question, answer FROM recent_consults WHERE email = ? ORDER BY timestamp ASC", (email, ))
+    consultas = [{'question': row[0], 'answer': row[1]} for row in cursor.fetchall()]
+    
+    contexto_como_texto = "\n\n".join(
+            f"{consulta['question']}:  {consulta['answer']}\n"
+            for consulta in consultas
+    )
 
     conn.close()
 
-    #Combinar en un solo contexto
-    context = {
-        'recent_consult': recent_consults,
-        'important_data': important_data
-    }
+    return contexto_como_texto
+###Obtener preguntas###
+def get_questions(email):
+    conn = sqlite3.connect('artemisa_local_db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT question FROM recent_consults WHERE email = ? ORDER BY timestamp ASC", (email, ))
+    questions = cursor.fetchall()
+    conn.close()
+    return questions
+###Obtener respuestas###
+def get_answers(email):
+    conn = sqlite3.connect('artemisa_local_db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT answer FROM recent_consults WHERE email = ? ORDER BY timestamp ASC", (email, ))
+    answers = cursor.fetchall()
+    conn.close()
+    return answers
 
-    return context
+
 ###Crear cuenta###
 def add_user(useraname, email, password):
     try:

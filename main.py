@@ -52,7 +52,7 @@ def main():
                 app_instance.transcribe_GUI(text=llm_response, speaker='assistant')
                 ### Obtener correo de usuario actual ###
                 current_email = app_instance.master.current_email
-                if current_email:
+                if current_email and llm_response != "Hubo un error inesperado, intentelo nuevamente" and llm_response != "Hubo un error en la respuesta, intentelo nuevamente":
                     local_db.insertar_consulta(question=recognized_text, answer=llm_response, email=current_email)
                 recognized_text = None  #Reiniciar despúes de procesar el texto y almacenar en la base de datos
                 #Enviar a TTS
@@ -75,17 +75,12 @@ def process_text(recognized_text):
             response = ask_to_openai(recognized_text)
         else:
         ### LLM local ###
-            initial_context = """El proyecto ARTEMISA es un asistente que utiliza modelos de lenguaje para responder a preguntas  
-            Yo soy el proyecto ARTEMISA
-            Nombres: Rebecca
-            Usuario Actual: Aragón
-            Información: Aragón es el usuario actual"""
-            response, context = generate_response(recognized_text, initial_context, llm_model, llm_tokenizer)
+            contexto = local_db.recuperar_contexto(app_instance.master.current_email)
+            response= generate_response(recognized_text, contexto, llm_model, llm_tokenizer)
 
         ### Verificar que la respuesta no esté vacía ###
         if not response or response == '[CLS]':
-            raise ValueError("La respuesta del LLM está vacía")    
-        print(f"Respuesta del LLM: {response}")
+            raise ValueError("La respuesta del LLM está vacía") 
     except ValueError as ve:
         print(f"Error en la respuesta del LLM: {ve}")
         response = "Hubo un error en la respuesta, intentelo nuevamente"
