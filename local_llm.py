@@ -5,7 +5,7 @@ import local_db
 #Inicializar el modelo (Flan-T5) y el tokenizer
 def initialize_llm():
     #Definir el nombre del modelo que se usará
-    model_name = "mrm8488/distill-bert-base-spanish-wwm-cased-finetuned-spa-squad2-es" 
+    model_name = "./LLM/Local/models--mrm8488--distill-bert-base-spanish-wwm-cased-finetuned-spa-squad2-es/snapshots/dcadd98e59cd7ce8efd00cb4c61a024e2895b4c1" 
     #Inicializar tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     #Inicializar modelo

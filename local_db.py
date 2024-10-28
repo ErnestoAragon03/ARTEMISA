@@ -29,7 +29,7 @@ def insertar_consulta(question, answer, email):
     conn.commit()
     conn.close()
 
-def recuperar_contexto(consults_limit=10):
+def recuperar_contexto(consults_limit=50):
     conn = sqlite3.connect('artemisa_local_db')
     cursor = conn.cursor()
 
@@ -37,17 +37,7 @@ def recuperar_contexto(consults_limit=10):
     cursor.execute("SELECT question, answer FROM recent_consults ORDER BY timestamp DESC LIMIT ?", (consults_limit,))
     recent_consults = [{'question': row[0], 'answer': row[1]} for row in cursor.fetchall()]
 
-    #Recuperar datos importantes
-    cursor.execute("SELECT key, value FROM important_data")
-    important_data = {row[0]: row[1] for row in cursor.fetchall()}
-
     conn.close()
-
-    #Combinar en un solo contexto
-    context = {
-        'recent_consult': recent_consults,
-        'important_data': important_data
-    }
 
     return context
 ###Crear cuenta###

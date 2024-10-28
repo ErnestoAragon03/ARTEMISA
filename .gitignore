@@ -26,5 +26,8 @@ Wake_Words/LICENSE.txt
 #Ignorar archivos temporales para el ASR
 ASR/Online/Temp
 
+#Ignorar archivos del modelo LLM
+LLM/Local
+
 .Secret
 
