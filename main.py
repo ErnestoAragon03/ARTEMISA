@@ -52,7 +52,8 @@ def main():
                 app_instance.transcribe_GUI(text=llm_response, speaker='assistant')
                 ### Obtener correo de usuario actual ###
                 current_email = app_instance.master.current_email
-                if current_email:
+                if current_email and llm_response != "Hubo un error inesperado, intentelo nuevamente" and llm_response != "Hubo un error en la respuesta, intentelo nuevamente":
+                    print("Si lo guardó")
                     local_db.insertar_consulta(question=recognized_text, answer=llm_response, email=current_email)
                 recognized_text = None  #Reiniciar despúes de procesar el texto y almacenar en la base de datos
                 #Enviar a TTS
