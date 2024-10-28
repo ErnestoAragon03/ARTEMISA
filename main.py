@@ -53,7 +53,6 @@ def main():
                 ### Obtener correo de usuario actual ###
                 current_email = app_instance.master.current_email
                 if current_email and llm_response != "Hubo un error inesperado, intentelo nuevamente" and llm_response != "Hubo un error en la respuesta, intentelo nuevamente":
-                    print("Si lo guardó")
                     local_db.insertar_consulta(question=recognized_text, answer=llm_response, email=current_email)
                 recognized_text = None  #Reiniciar despúes de procesar el texto y almacenar en la base de datos
                 #Enviar a TTS
@@ -77,13 +76,11 @@ def process_text(recognized_text):
         else:
         ### LLM local ###
             contexto = local_db.recuperar_contexto(app_instance.master.current_email)
-            print("Contexto: ", contexto)
             response= generate_response(recognized_text, contexto, llm_model, llm_tokenizer)
 
         ### Verificar que la respuesta no esté vacía ###
         if not response or response == '[CLS]':
-            raise ValueError("La respuesta del LLM está vacía")    
-        print(f"Respuesta del LLM: {response}")
+            raise ValueError("La respuesta del LLM está vacía") 
     except ValueError as ve:
         print(f"Error en la respuesta del LLM: {ve}")
         response = "Hubo un error en la respuesta, intentelo nuevamente"

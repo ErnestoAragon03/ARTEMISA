@@ -61,7 +61,6 @@ class HomeScreen(tk.Frame):
             self.transcribe_GUI(text=response, speaker="assistant") #Transcribir la respuesta del LLM
             #Guardar la consulta únicamente si la respuesta no fue un error
             if response != "Hubo un error inesperado, intentelo nuevamente" and response != "Hubo un error en la respuesta, intentelo nuevamente":
-                print("Sí lo guardó")
                 local_db.insertar_consulta(question=user_input, answer=response, email=app.current_email)
 
     #Función para interrumpir al TTS
@@ -327,14 +326,10 @@ class AccountScreen(tk.Frame):
 
     ###Funciones de validación de campos ###
     def validate_email(self, email):
-        print("EMAIL: ", email)
         patron = r"^[\w\.-]+@[\w\.-]+\.\w+$"    #Expresión regular
-        print(re.match(patron, email))
         return re.match(patron, email) is None
     def validate_password(self, password):
-        print("PASSWORD: ", password)
         patron = r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$" #Expresión regular
-        print(re.match(patron, password))
         return re.match(patron, password) is None
     ###Función para limpiar campos de login, register y Home###
     def reset_fields(self):
@@ -483,7 +478,6 @@ class Application(tk.Tk):
 
     ###Función para cambiar la voz seleccionada###
     def change_voice(self, new_voice):
-        print(f"Cambiando voz a {new_voice}")
         local_db.change_voice(new_voice, self.current_email)
         self.current_voice = new_voice
 
@@ -495,10 +489,6 @@ if __name__ == "__main__":
     global username, email
     ###Obtener el nombre de usuario y correo de la última cuenta activa, si es que hay una###
     username, email, voice = local_db.get_last_active_session()
-    if username:
-        print(f"Sesión iniciada en la cuenta {username}")
-    else:
-        print("Modo guest")
 
     app = Application()
     internet_checker.stop_checking()
