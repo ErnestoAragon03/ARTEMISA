@@ -10,8 +10,7 @@ def init_db():
                    username TEXT NOT NULL,
                    password TEXT NOT NULL,
                    voice TEXT,
-                   logged BOOLEAN,
-                   active BOOLEAN)''')
+                   logged BOOLEAN)''')
     
     #Crear tabla de consultas recientes
     cursor.execute('''CREATE TABLE IF NOT EXISTS recent_consults(
@@ -66,7 +65,7 @@ def add_user(useraname, email, password):
 def authenticate_user(email, password):
     conn = sqlite3.connect('artemisa_local_db')
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM local_users WHERE email = ? AND password = ?", (email, password))
+    cursor.execute("SELECT * FROM local_users WHERE email = ? AND password = ? AND active = ?", (email, password, 1))
     user = cursor.fetchone()
     conn.close()
     return user is not None
@@ -124,5 +123,22 @@ def change_voice(voice,email):
     conn = sqlite3.connect('artemisa_local_db')
     cursor = conn.cursor()
     cursor.execute("UPDATE local_users SET voice=(?) WHERE email=(?)", (voice, email))
+    conn.commit()
+    conn.close()
+
+#Cerrar cuentas (PERMANENTEMENTE)
+def delete_account(email):
+    conn = sqlite3.connect('artemisa_local_db')
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM local_users WHERE email=(?)", (email,))
+    conn.commit()
+    conn.close()
+    delete_consults(email)
+
+#Borrar las consultas de una cuenta (PERMANENTEMENTE)
+def delete_consults(email):
+    conn = sqlite3.connect('artemisa_local_db')
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM recent_consults WHERE email=(?)", (email,))
     conn.commit()
     conn.close()
