@@ -48,10 +48,6 @@ class HomeScreen(tk.Frame):
         ##Botón para Pantalla de cuenta##
         account_button = tk.Button(self, text="Cuenta", command=lambda: controller.show_frame(AccountScreen))
         account_button.pack(side=tk.BOTTOM, pady=10)
-
-        ##Botón para Pantalla Principal
-        self.home_button = tk.Button(self, text="Home", state="disabled", ) #Deshabilitado porque ya estamos en esta pantalla
-        self.home_button.pack(side=tk.BOTTOM, pady=10)
         
 
     def send_text(self, event=None):
@@ -241,6 +237,10 @@ class AccountScreen(tk.Frame):
         logout_btn = tk.Button(frame, text="Cerrar Sesión", command=self.logout)
         logout_btn.pack(pady=10)
 
+        #Botón de eliminación de cuenta
+        closte_btn = tk.Button(frame, text="Eliminar Cuenta", command=self.confirm_deletion)
+        closte_btn.pack(pady=10)
+
         ###Barra de navegación###   
         ##Botón para Pantalla Principal##
         home_button = tk.Button(frame, text="Home", command=lambda: self.app.show_frame(HomeScreen))
@@ -350,6 +350,68 @@ class AccountScreen(tk.Frame):
         self.reset_fields()
         self.show_login()
 
+    ###Función para confirmar la eliminación de cuenta###
+    def confirm_deletion(self):
+        # Crear ventana emergente
+        popup = tk.Toplevel()
+        popup.title("Eliminar cuenta")
+        popup.geometry("450x350")
+
+        #Titulo
+        title_label1 = tk.Label(popup, text="Confirmar eliminación de cuenta")
+        title_label1.pack(pady=10)
+        title_label2 = tk.Label(popup, text="Esta acción es permanente")
+        title_label2.pack(pady=5)
+
+        #Pedir info de cuenta
+        title_label3 = tk.Label(popup, text="Para confirmar que está seguro llene los siguientes campos:")
+        title_label3.pack(pady=5)
+        #Etiqueta y entrada para el correo
+        tk.Label(popup, text="Email: ").pack(pady=5)
+        email_entry = tk.Entry(popup)
+        email_entry.pack(pady=5)
+        
+        #Etiqueta y entrada para la contraseña
+        tk.Label(popup, text="Contraseña: ").pack(pady=5)
+        password_entry = tk.Entry(popup, show="*")
+        password_entry.pack(pady=5)
+
+        def mini_toggle_password():
+            show = "" if password_entry.cget("show") == "*" else "*"
+            password_entry.config(show=show)
+
+        # Botón para mostrar/ocultar contraseña
+        show_password_btn = tk.Button(popup, text="Mostrar", command=mini_toggle_password)
+        show_password_btn.pack()
+
+        def submit_form():
+            email = email_entry.get()
+            password = password_entry.get()
+
+            if email and password:
+                if email != self.app.current_email:
+                    messagebox.showerror("Email incorrecto", "El email no corresponde con la cuenta actual ¿Está seguro que esta es la cuenta que desea eliminar?")
+                elif local_db.authenticate_user(email, password):
+                    self.delete_account()
+                    messagebox.showinfo("Cuenta Eliminada", "Cuenta eliminada exitosamente")
+                    popup.destroy() #Cerrar popup
+                else:
+                    messagebox.showerror("Datos incorrectos", "Correo o contraseña incorrectos")
+            else:
+                messagebox.showerror("Campos incompletos", "Complete todos los campos porfavor")
+        #Botón de confirmación
+        tk.Button(popup, text="Confirmar eliminación de cuenta", command=submit_form).pack(pady=20)
+
+        popup.transient(app)    # Asegura que la ventana principal esté detrás del popup
+        popup.grab_set          # Bloquea la ventana principal hasta que el popup se cierre
+        app.wait_window(popup) # Espera a que el popup se cierre antes de seguir ejecutando
+
+    def delete_account(self):
+        local_db.delete_account(self.app.current_email)
+        self.app.logout(Deleted=True)
+        self.reset_fields()
+        self.show_login()
+
 
 class Application(tk.Tk):
     global username, email, voice, internet_checker
@@ -386,11 +448,12 @@ class Application(tk.Tk):
         frame.tkraise() #Trae el Frame al frente
 
     ###Función para cerrar sesión
-    def logout(self):
+    def logout(self, Deleted=False):
         self.current_user = None
         self.current_email = None
         self.current_voice = 'nova'
-        messagebox.showerror("Sesión cerrada", "Se ha cerrado la sesión, vuelve pronto.  Pasando al modo guest.")
+        if not Deleted:
+            messagebox.showwarning("Sesión cerrada", "Se ha cerrado la sesión, vuelve pronto.  Pasando al modo guest.")
         local_db.update_session(email=None)
         self.clearHome()
         self.show_frame(HomeScreen)

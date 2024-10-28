@@ -127,9 +127,9 @@ def change_voice(voice,email):
     conn.close()
 
 #Cerrar cuentas (PERMANENTEMENTE)
-def close_account(email):
+def delete_account(email):
     conn = sqlite3.connect('artemisa_local_db')
-    cursor = sqlite3.cursor()
+    cursor = conn.cursor()
     cursor.execute("DELETE FROM local_users WHERE email=(?)", (email,))
     conn.commit()
     conn.close()
@@ -138,7 +138,7 @@ def close_account(email):
 #Borrar las consultas de una cuenta (PERMANENTEMENTE)
 def delete_consults(email):
     conn = sqlite3.connect('artemisa_local_db')
-    cursor = sqlite3.cursor()
+    cursor = conn.cursor()
     cursor.execute("DELETE FROM recent_consults WHERE email=(?)", (email,))
     conn.commit()
     conn.close()
