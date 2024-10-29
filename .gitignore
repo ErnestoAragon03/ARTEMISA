@@ -29,5 +29,8 @@ ASR/Online/Temp
 #Ignorar archivos del modelo LLM
 LLM/Local
 
+#Ingorar Add-ons del modelo LLM
+LLM/Add-on
+
 .Secret
 

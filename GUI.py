@@ -100,7 +100,6 @@ class HomeScreen(tk.Frame):
             self.mic_button.config(text="Activar Microfono")
             self.stop_pipeline()
             main.recognized_text = ""
-            print("muting...")
         else:
             mic_active = True
             self.mic_button.config(text="Desactivar Microfono")
@@ -114,6 +113,7 @@ class HomeScreen(tk.Frame):
         elif speaker=='assistant':
             self.transcription_area.insert(tk.END, f"{text}\n", "assistant")    #Transcipción de lado del asistente
         self.transcription_area.config(state=tk.DISABLED)
+        self.transcription_area.see("end") 
 
     ###Función para limpiar el área de transcripciones
     def reset_transcriptions(self):
@@ -483,7 +483,6 @@ class Application(tk.Tk):
         ### Acceder a HomeScreen desde el diccionario de Frames ###
         home_screen = self.frames[HomeScreen] 
         if hasattr(home_screen, 'stop_pipeline'):
-            print("Deteniendo Pipeline actual")
             home_screen.stop_pipeline()
 
         ### Detener el verificador de conexión ###
