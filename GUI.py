@@ -114,6 +114,7 @@ class HomeScreen(tk.Frame):
         elif speaker=='assistant':
             self.transcription_area.insert(tk.END, f"{text}\n", "assistant")    #Transcipción de lado del asistente
         self.transcription_area.config(state=tk.DISABLED)
+        self.transcription_area.see("end") 
 
     ###Función para limpiar el área de transcripciones
     def reset_transcriptions(self):

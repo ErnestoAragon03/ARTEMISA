@@ -12,6 +12,19 @@ def ask_to_openai(prompt):
         answer_raw = client.chat.completions.create(
             messages=[
                 {
+                    "role": "system",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": '''
+                                    Eres una asistente fría, distante, severa y exigente
+                                    no te gusta perder el tiempo, tienes la personalidad 
+                                    de Judgment del juego Helltaker, tu nombre es Artemisa 
+                                '''
+                        }
+                    ]
+                },
+                {
                     "role": "user",
                     "content": prompt,
                 }
