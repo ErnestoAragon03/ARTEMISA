@@ -7,13 +7,17 @@ import re
 from check_internet_connection import InternetChecker
 
 mic_active = True
+azul_marino = "#000630"
+gris_oscuro = "#1e262b"
+white = "white"
 
 class HomeScreen(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
+        self.config(bg=azul_marino, highlightbackground=azul_marino)
         #Configuración de Widgets de la pantalla principal
-        label = tk.Label(self, text="Home", font=("Arial", 18))
+        label = tk.Label(self, text="Home", font=("Arial", 18), foreground=white, background=azul_marino, highlightbackground=azul_marino)
         label.grid(row=0, column=0, pady=10, padx=10, sticky="nsew")
         
         self.pipeline_thread = None
@@ -22,44 +26,46 @@ class HomeScreen(tk.Frame):
         ###Frame para contener toda el área de transcripciones###
         self.transcription_frame = tk.Frame(self)
         self.transcription_frame.grid(row = 1, column=0, pady=10, padx=20, sticky="nsew")
+        self.transcription_frame.config(bg=azul_marino, highlightbackground=azul_marino)
 
         ###Campo para mostrar Transcripciones###
-        self.transcription_area = tk.Text(self.transcription_frame, height=30, width=150, state=tk.DISABLED, wrap="word")
-        self.transcription_area.grid(row=0, column=0, sticky="nsew")
+        self.transcription_area = tk.Text(self.transcription_frame, height=30, width=150, state=tk.DISABLED, wrap="word", background=gris_oscuro, highlightbackground=gris_oscuro)
+        self.transcription_area.grid(row=0, column=0, sticky="ew")
 
         ###Scrollbar para el área de transcripciones###
-        self.scrollbar = tk.Scrollbar(self.transcription_frame, command=self.transcription_area.yview)
-        self.scrollbar.grid(row=0, column=1, sticky="ns")
+        self.scrollbar = tk.Scrollbar(self.transcription_frame, command=self.transcription_area.yview, bg="blue", troughcolor=gris_oscuro, activebackground='red')
+        self.scrollbar.grid(row=0, column=1, sticky="nsew")
 
         self.transcription_area.config(yscrollcommand=self.scrollbar.set)
 
         self.transcription_area.see("end") 
 
         ###Estilos del texto##
-        self.transcription_area.tag_configure("user", foreground="blue", justify='right')   #Transcripción del usuario
-        self.transcription_area.tag_configure("assigstant", foreground="green", justify='left')  #Respuesta del Asistente
+        self.transcription_area.tag_configure("user", foreground=white, justify='right')   #Transcripción del usuario
+        self.transcription_area.tag_configure("assistant", foreground="lightblue", justify='left')  #Respuesta del Asistente
 
         ###Frame que contiene el input de texto, botón de enviar y silenciar###
         botton_frame = tk.Frame(self)
-        botton_frame.grid(row=2, column=0, pady=10, padx=20, sticky="ew")
+        botton_frame.grid(row=2, column=0, pady=10, padx=20, sticky="nsew")
+        botton_frame.config(bg=azul_marino)
 
         ###Input de texto###
-        self.text_input = tk.Entry(botton_frame, width=40)
-        self.text_input.grid(row=0, column=0, padx=5, pady=5)
+        self.text_input = tk.Entry(botton_frame, width=150, background=gris_oscuro, foreground=white, highlightbackground=gris_oscuro)
+        self.text_input.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
         self.text_input.bind("<Return>", self.send_text)  #Vincular la tecla Enter para enviar el texto
         ###Botón para enviar input de texto###
-        send_button = tk.Button(botton_frame, text="Enviar", command=self.send_text)
-        send_button.grid(row=0, column=1, padx=5)
+        send_button = tk.Button(botton_frame, text="Enviar", command=self.send_text, background=gris_oscuro, foreground=white, highlightbackground=gris_oscuro)
+        send_button.grid(row=0, column=1, padx=5, sticky="nsew")
         ###Botón para terminar TTS ###
-        end_tts_button = tk.Button(botton_frame, text="Silenciar TTS", command=self.interrupt_tts)
-        end_tts_button.grid(row=0, column=2, padx=5)
+        end_tts_button = tk.Button(botton_frame, text="Silenciar TTS", command=self.interrupt_tts, background=gris_oscuro, foreground=white, highlightbackground=gris_oscuro)
+        end_tts_button.grid(row=0, column=2, padx=5, sticky="nsew")
         ###Botón ASR###
-        self.mic_button = tk.Button(botton_frame, text="Desactivar Micrófono", command= self.toggle_mic)
-        self.mic_button.grid(row=0, column=3, padx=5)
+        self.mic_button = tk.Button(botton_frame, text="Desactivar Micrófono", command= self.toggle_mic, background=gris_oscuro, foreground=white, highlightbackground=gris_oscuro)
+        self.mic_button.grid(row=0, column=3, padx=5, sticky="nsew")
 
         ###Barra de navegación###
         ##Botón para Pantalla de cuenta##
-        account_button = tk.Button(self, text="Cuenta", command=lambda: controller.show_frame(AccountScreen))
+        account_button = tk.Button(self, text="Cuenta", command=lambda: controller.show_frame(AccountScreen), background=gris_oscuro, foreground=white, highlightbackground=gris_oscuro)
         account_button.grid(row=3, column=0, pady=40)
 
         # Configurar el peso de las filas y columnas para el diseño responsivo
@@ -115,9 +121,9 @@ class HomeScreen(tk.Frame):
     def transcribe_GUI(self, text, speaker):
         self.transcription_area.config(state=tk.NORMAL) #Habilita la edición del text Widget
         if speaker == 'user':
-            self.transcription_area.insert(tk.END, f"{text}\n", "user")    #Transcipción de lado del usuario
+            self.transcription_area.insert(tk.END, f"{text}\n\n\n", "user")    #Transcipción de lado del usuario
         elif speaker=='assistant':
-            self.transcription_area.insert(tk.END, f"{text}\n", "assistant")    #Transcipción de lado del asistente
+            self.transcription_area.insert(tk.END, f"{text}\n\n\n", "assistant")    #Transcipción de lado del asistente
         self.transcription_area.config(state=tk.DISABLED)
         self.transcription_area.see("end") 
 
@@ -148,7 +154,8 @@ class AccountScreen(tk.Frame):
     #Pantalla de login
     def init_login_screen(self):
         frame = tk.Frame(self)
-        frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)  # Asegúrate de agregar el frame a la cuadrícula
+        frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)  # Asegurarse de agregar el frame a la cuadrícula
+        
 
         title_label = tk.Label(frame, text="Iniciar Sesión", font=("Arial", 18))
         title_label.grid(row=0, column=0, pady=10)
@@ -484,7 +491,6 @@ class Application(tk.Tk):
             self.frames[Screen] = frame
             #Los frames se apilan
             frame.grid(row=0, column=0, sticky="nsew")  
-        
         # Configurar el peso de las filas y columnas para el diseño responsivo
         self.grid_rowconfigure(0, weight=1)  # Hacer que la fila 0 (donde se colocan los frames) se expanda
         self.grid_columnconfigure(0, weight=1)  # Hacer que la columna 0 se expanda
@@ -552,7 +558,6 @@ class Application(tk.Tk):
 if __name__ == "__main__":
     ###Confirmar creación de DB al iniciar la aplicación###
     local_db.init_db()
-    global username, email
     ###Obtener el nombre de usuario y correo de la última cuenta activa, si es que hay una###
     username, email, voice = local_db.get_last_active_session()
 
