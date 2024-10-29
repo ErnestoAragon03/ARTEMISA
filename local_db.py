@@ -29,7 +29,25 @@ def insertar_consulta(question, answer, email):
     conn.commit()
     conn.close()
 
-def recuperar_contexto(email):
+###Función para recuperar el contexto (prioriza lo más reciente)###
+def get_context(email, consults_limit=10):
+    context = []
+    conn = sqlite3.connect('artemisa_local_db')
+    cursor = conn.cursor()
+
+    #Recuperar consultas recientes
+    cursor.execute("SELECT question, answer FROM recent_consults WHERE email = ? ORDER BY timestamp DESC LIMIT ?", (email, consults_limit))
+    consults = cursor.fetchall()
+
+    for consult in reversed(consults):
+        context.append({"role": "user", "content": consult[0]})
+        context.append({"role": "assistant", "content": consult[1]})
+    conn.close()
+
+    return context
+
+###Función para recuperar toda la conversación (prioriza lo más antiguo)###
+def get_conversations(email):
     conn = sqlite3.connect('artemisa_local_db')
     cursor = conn.cursor()
 

@@ -100,7 +100,6 @@ class HomeScreen(tk.Frame):
             self.mic_button.config(text="Activar Microfono")
             self.stop_pipeline()
             main.recognized_text = ""
-            print("muting...")
         else:
             mic_active = True
             self.mic_button.config(text="Desactivar Microfono")
@@ -484,7 +483,6 @@ class Application(tk.Tk):
         ### Acceder a HomeScreen desde el diccionario de Frames ###
         home_screen = self.frames[HomeScreen] 
         if hasattr(home_screen, 'stop_pipeline'):
-            print("Deteniendo Pipeline actual")
             home_screen.stop_pipeline()
 
         ### Detener el verificador de conexión ###

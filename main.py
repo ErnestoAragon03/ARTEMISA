@@ -62,7 +62,6 @@ def main():
                 conversation_active = False
 
         else:
-            print("Terminando Pipeline")
             break
             
 
@@ -72,10 +71,10 @@ def process_text(recognized_text):
         ### Seleccionar modelo online o local
         if internet_checker.internet_status:
         ### LLM Online ###
-            response = ask_to_openai(recognized_text, app_instance.master.current_user)
+            response = ask_to_openai(recognized_text, app_instance.master.current_user, app_instance.master.current_email)
         else:
         ### LLM local ###
-            contexto = local_db.recuperar_contexto(app_instance.master.current_email)
+            contexto = local_db.get_conversations(app_instance.master.current_email)
             response= generate_response(recognized_text, contexto, llm_model, llm_tokenizer)
 
         ### Verificar que la respuesta no esté vacía ###

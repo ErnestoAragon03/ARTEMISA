@@ -1,5 +1,5 @@
 from openai import OpenAI
-import local_db
+from local_db import get_context
 
 client = OpenAI(
     #organization= 'org-BLKMXfWSb6Ytc2bIO4tIJ6EM',
@@ -7,35 +7,23 @@ client = OpenAI(
 
 )
 
-def ask_to_openai(prompt, user):
+def ask_to_openai(prompt, user, email):
+    ###Crear personalidad###
+    personality = {"role": "system",
+                    "content": f"Eres una asistente fría, distante, severa y exigente no te gusta perder el tiempo, tienes la personalidad  de Judgment del juego Helltaker, tu nombre es Artemisa, la persona a la que asistes se llama {user}.  Usas las preguntas y respuestas previas para mantener una memoria de la conversación."
+                    }
+    ###Obtener contexto###
+    context = get_context(email, consults_limit=10)
+    ###Añadir la personalidad y la pregunta al contexto (así es más fácil de entregar a la API)###
+    context.insert(0, personality)
+    context.append({"role": "user", "content": prompt})
     try:
         answer_raw = client.chat.completions.create(
-            messages=[
-                {
-                    "role": "system",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": f'''
-                                    Eres una asistente fría, distante, severa y exigente
-                                    no te gusta perder el tiempo, tienes la personalidad 
-                                    de Judgment del juego Helltaker, tu nombre es Artemisa,
-                                    la persona a la que asistes se llama {user}
-                                '''
-                        }
-                    ]
-                },
-                {
-                    "role": "user",
-                    "content": prompt,
-                }
-            ],
-            model="gpt-4o",
+            messages=context,
+            model="gpt-4o"
         )
         answer = answer_raw.choices[0].message.content
         #Extraer y retornar respuesta
-        print()
-        #local_db.insertar_consulta(question=prompt,answer=answer)
         return answer
     except Exception as e:
         print(f"Error al obtener respuesta de OpenAI: {e}")
