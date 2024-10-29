@@ -14,21 +14,22 @@ class HomeScreen(tk.Frame):
         self.controller = controller
         #Configuración de Widgets de la pantalla principal
         label = tk.Label(self, text="Home", font=("Arial", 18))
-        label.pack(pady=10)
+        label.grid(row=0, column=0, pady=10, padx=10, sticky="nsew")
         
         self.pipeline_thread = None
         self.start_pipeline()
+
         ###Frame para contener toda el área de transcripciones###
         self.transcription_frame = tk.Frame(self)
-        self.transcription_frame.pack(pady=10)
+        self.transcription_frame.grid(row = 1, column=0, pady=10, padx=20, sticky="nsew")
 
         ###Campo para mostrar Transcripciones###
-        self.transcription_area = tk.Text(self.transcription_frame, height=30, width=100, state=tk.DISABLED, wrap="word")
-        self.transcription_area.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.transcription_area = tk.Text(self.transcription_frame, height=30, width=150, state=tk.DISABLED, wrap="word")
+        self.transcription_area.grid(row=0, column=0, sticky="nsew")
 
         ###Scrollbar para el área de transcripciones###
         self.scrollbar = tk.Scrollbar(self.transcription_frame, command=self.transcription_area.yview)
-        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.scrollbar.grid(row=0, column=1, sticky="ns")
 
         self.transcription_area.config(yscrollcommand=self.scrollbar.set)
 
@@ -40,26 +41,31 @@ class HomeScreen(tk.Frame):
 
         ###Frame que contiene el input de texto, botón de enviar y silenciar###
         botton_frame = tk.Frame(self)
-        botton_frame.pack(fill=tk.X, pady=10)
+        botton_frame.grid(row=2, column=0, pady=10, padx=20, sticky="ew")
 
         ###Input de texto###
         self.text_input = tk.Entry(botton_frame, width=40)
-        self.text_input.pack(side=tk.LEFT, padx=5, pady=5)
+        self.text_input.grid(row=0, column=0, padx=5, pady=5)
         self.text_input.bind("<Return>", self.send_text)  #Vincular la tecla Enter para enviar el texto
         ###Botón para enviar input de texto###
         send_button = tk.Button(botton_frame, text="Enviar", command=self.send_text)
-        send_button.pack(side=tk.LEFT, padx=5)
+        send_button.grid(row=0, column=1, padx=5)
         ###Botón para terminar TTS ###
         end_tts_button = tk.Button(botton_frame, text="Silenciar TTS", command=self.interrupt_tts)
-        end_tts_button.pack(side=tk.LEFT, padx=5)
+        end_tts_button.grid(row=0, column=2, padx=5)
         ###Botón ASR###
         self.mic_button = tk.Button(botton_frame, text="Desactivar Micrófono", command= self.toggle_mic)
-        self.mic_button.pack(side=tk.LEFT, padx=5)
+        self.mic_button.grid(row=0, column=3, padx=5)
 
         ###Barra de navegación###
         ##Botón para Pantalla de cuenta##
         account_button = tk.Button(self, text="Cuenta", command=lambda: controller.show_frame(AccountScreen))
-        account_button.pack(side=tk.BOTTOM, pady=10)
+        account_button.grid(row=3, column=0, pady=40)
+
+        # Configurar el peso de las filas y columnas para el diseño responsivo
+        self.grid_rowconfigure(1, weight=1)  # Hacer que la fila 1 (transcripción) se expanda
+        self.grid_columnconfigure(0, weight=1)  # Hacer que la columna 0 se expanda
+        self.grid_rowconfigure(3, weight=1) #Hacer que la fila 3 (botón de navegación) se expanda
         
 
     def send_text(self, event=None):
@@ -142,144 +148,169 @@ class AccountScreen(tk.Frame):
     #Pantalla de login
     def init_login_screen(self):
         frame = tk.Frame(self)
-        title_label = tk.Label(frame, text="Iniciar Sesión")
-        title_label.pack(pady=10)
-        
-        #Campos de entradas
-        email_label = tk.Label(frame, text = "Email Asociado")
-        email_label.pack(pady=5)
+        frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)  # Asegúrate de agregar el frame a la cuadrícula
+
+        title_label = tk.Label(frame, text="Iniciar Sesión", font=("Arial", 18))
+        title_label.grid(row=0, column=0, pady=10)
+
+        # Campos de entradas
+        email_label = tk.Label(frame, text="Email Asociado")
+        email_label.grid(row=1, column=0, pady=5)
         self.email_entry = tk.Entry(frame)
-        self.email_entry.pack(pady=5)
-        self.email_entry.bind("<Return>", self.login)  #Vincular la tecla Enter para enviar datos al login
+        self.email_entry.grid(row=2, column=0, pady=5)
+        self.email_entry.bind("<Return>", self.login)  # Vincular la tecla Enter para enviar datos al login
 
         password_label = tk.Label(frame, text="Contraseña")
-        password_label.pack(pady=5)
+        password_label.grid(row=3, column=0, pady=5)
         self.password_entry = tk.Entry(frame, show="*")
-        self.password_entry.pack(pady=5)
-        self.password_entry.bind("<Return>", self.login)  #Vincular la tecla Enter para enviar datos al login
+        self.password_entry.grid(row=4, column=0, pady=5)
+        self.password_entry.bind("<Return>", self.login)  # Vincular la tecla Enter para enviar datos al login
+        
         # Botón para mostrar/ocultar contraseña
         show_password_btn = tk.Button(frame, text="Mostrar", command=self.toggle_password)
-        show_password_btn.pack()
+        show_password_btn.grid(row=5, column=0, pady=5)
 
         # Botones de acciones
         login_btn = tk.Button(frame, text="Iniciar sesión", command=self.login)
-        login_btn.pack(pady=10)
+        login_btn.grid(row=6, column=0, pady=10)
 
         switch_register_btn = tk.Button(frame, text="Crear cuenta", command=self.show_register)
-        switch_register_btn.pack()
+        switch_register_btn.grid(row=7, column=0, pady=5)
 
-        ###Barra de navegación###   
-        ##Botón para Pantalla Principal##
+        ### Barra de navegación ###
+        ## Botón para Pantalla Principal ##
         home_button = tk.Button(frame, text="Home", command=lambda: self.app.show_frame(HomeScreen))
-        home_button.pack(side=tk.BOTTOM, pady=10)
+        home_button.grid(row=8, column=0, pady=10)
+
+        # Configurar el peso de las filas y columnas para el diseño responsivo
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        self.update_idletasks()  # Fuerza el redibujado
 
         return frame
 
     #Pantalla sign in
     def init_register_screen(self):
         frame = tk.Frame(self)
-        title_label = tk.Label(frame, text="Crear Cuenta")
-        title_label.pack(pady=10)
+        frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)  # Asegúrate de agregar el frame a la cuadrícula
+
+        title_label = tk.Label(frame, text="Crear Cuenta", font=("Arial", 18))
+        title_label.grid(row=0, column=0, pady=10)
 
         # Campos de entrada
         email_label = tk.Label(frame, text="Email")
-        email_label.pack(pady=5)
+        email_label.grid(row=1, column=0, pady=5)
         self.register_email_entry = tk.Entry(frame)
-        self.register_email_entry.pack(pady=5)
-        self.register_email_entry.bind("<Return>", self.register)  #Vincular la tecla Enter para enviar datos al Register
+        self.register_email_entry.grid(row=2, column=0, pady=5)
+        self.register_email_entry.bind("<Return>", self.register)  # Vincular la tecla Enter para enviar datos al Register
 
         username_label = tk.Label(frame, text="Nombre de usuario (Este será el nombre por el que el asistente lo llamará)")
-        username_label.pack(pady=5)
+        username_label.grid(row=3, column=0, pady=5)
         self.register_username_entry = tk.Entry(frame)
-        self.register_username_entry.pack(pady=5)
-        self.register_username_entry.bind("<Return>", self.register)  #Vincular la tecla Enter para enviar datos al Register
+        self.register_username_entry.grid(row=4, column=0, pady=5)
+        self.register_username_entry.bind("<Return>", self.register)  # Vincular la tecla Enter para enviar datos al Register
 
         password_label = tk.Label(frame, text="Contraseña")
-        password_label.pack(pady=5)
+        password_label.grid(row=5, column=0, pady=5)
         self.register_password_entry = tk.Entry(frame, show="*")
-        self.register_password_entry.pack(pady=5)
-        self.register_password_entry.bind("<Return>", self.register)  #Vincular la tecla Enter para enviar datos al Register
+        self.register_password_entry.grid(row=6, column=0, pady=5)
+        self.register_password_entry.bind("<Return>", self.register)  # Vincular la tecla Enter para enviar datos al Register
 
         confirm_password_label = tk.Label(frame, text="Confirmar contraseña")
-        confirm_password_label.pack(pady=5)
+        confirm_password_label.grid(row=7, column=0, pady=5)
         self.confirm_password_entry = tk.Entry(frame, show="*")
-        self.confirm_password_entry.pack(pady=5)
-        self.confirm_password_entry.bind("<Return>", self.register)  #Vincular la tecla Enter para enviar datos al Register
+        self.confirm_password_entry.grid(row=8, column=0, pady=5)
+        self.confirm_password_entry.bind("<Return>", self.register)  # Vincular la tecla Enter para enviar datos al Register
 
         # Botón para mostrar/ocultar contraseña
         show_password_btn = tk.Button(frame, text="Mostrar", command=self.toggle_password)
-        show_password_btn.pack()
+        show_password_btn.grid(row=9, column=0, pady=5)
 
         # Botones de acciones
         register_btn = tk.Button(frame, text="Crear cuenta", command=self.register)
-        register_btn.pack(pady=10)
+        register_btn.grid(row=10, column=0, pady=10)
 
         switch_login_btn = tk.Button(frame, text="Iniciar sesión", command=self.show_login)
-        switch_login_btn.pack()
+        switch_login_btn.grid(row=11, column=0, pady=5)
 
-        ###Barra de navegación###   
-        ##Botón para Pantalla Principal##
+        ### Barra de navegación ###
+        ## Botón para Pantalla Principal ##
         home_button = tk.Button(frame, text="Home", command=lambda: self.app.show_frame(HomeScreen))
-        home_button.pack(side=tk.BOTTOM, pady=10)
+        home_button.grid(row=12, column=0, pady=10)
+
+        # Configurar el peso de las filas y columnas para el diseño responsivo
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        self.update_idletasks()  # Fuerza el redibujado
 
         return frame
     
     ###Función de Profile (sesión ya inicidada)
     def init_profile_screen(self):
         frame = tk.Frame(self)
-        title_label = tk.Label(frame, text="Perfil")
-        title_label.pack(pady=10)
+        frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)  # Asegúrate de agregar el frame a la cuadrícula
 
-        #Mostrar nombre de usuario
+        title_label = tk.Label(frame, text="Perfil", font=("Arial", 18))
+        title_label.grid(row=0, column=0, pady=10)
+
+        # Mostrar nombre de usuario
         self.user_label = tk.Label(frame, text="Usuario: ")
-        self.user_label.pack(pady=5)
+        self.user_label.grid(row=1, column=0, pady=5)
 
-        #Mostrar email
+        # Mostrar email
         self.email_label = tk.Label(frame, text="Email: ")
-        self.email_label.pack(pady=5)
+        self.email_label.grid(row=2, column=0, pady=5)
 
-        #Obtion Menu para mostrar voces#
+        # Opción Menu para mostrar voces
         self.selected_voice = tk.StringVar(self)
-        self.selected_voice.set(self.app.current_voice) #Opción default
-        
+        self.selected_voice.set(self.app.current_voice)  # Opción default
+
         voices = ["Nova", "Alloy", "Echo", "Fable", "Onyx", "Shimmer"]
         self.dropdown = tk.OptionMenu(frame, self.selected_voice, *voices, command=self.app.change_voice)
-        self.dropdown.pack(pady=10)
+        self.dropdown.grid(row=3, column=0, pady=10)
 
-
-        #Botón de cierre de sesión
+        # Botón de cierre de sesión
         logout_btn = tk.Button(frame, text="Cerrar Sesión", command=self.logout)
-        logout_btn.pack(pady=10)
+        logout_btn.grid(row=4, column=0, pady=10)
 
-        #Botón de eliminación de cuenta
-        closte_btn = tk.Button(frame, text="Eliminar Cuenta", command=self.confirm_deletion)
-        closte_btn.pack(pady=10)
+        # Botón de eliminación de cuenta
+        delete_btn = tk.Button(frame, text="Eliminar Cuenta", command=self.confirm_deletion)
+        delete_btn.grid(row=5, column=0, pady=10)
 
-        ###Barra de navegación###   
-        ##Botón para Pantalla Principal##
+        ### Barra de navegación ###
+        ## Botón para Pantalla Principal ##
         home_button = tk.Button(frame, text="Home", command=lambda: self.app.show_frame(HomeScreen))
-        home_button.pack(side=tk.BOTTOM, pady=10)
+        home_button.grid(row=6, column=0, pady=10)
+
+        # Configurar el peso de las filas y columnas para el diseño responsivo
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        
+        self.update_idletasks()  # Fuerza el redibujado
+
         return frame
     
     def show_login(self):
         self.clear_frame()
-        self.login_screen.pack()
+        self.login_screen.grid()
 
     def show_register(self):
         self.clear_frame()
-        self.register_screen.pack()
+        self.register_screen.grid()
     
     def show_profile(self, username, email):
         self.clear_frame()
         self.user_label.config(text=f"Usuario: {username}")
         self.email_label.config(text=f"Email: {email}")
-        self.profile_screen.pack()
+        self.profile_screen.grid()
 
     #Función para limpiar la pantalla de subpantallas
     def clear_frame(self):
-        self.login_screen.pack_forget()
-        self.register_screen.pack_forget()
-        self.profile_screen.pack_forget()
+        self.login_screen.grid_forget()
+        self.register_screen.grid_forget()
+        self.profile_screen.grid_forget()
 
     #Función de mostrar/ocultar contraseña
     def toggle_password(self):
@@ -301,6 +332,7 @@ class AccountScreen(tk.Frame):
             self.app.current_user = username
             self.app.current_email = email
             self.app.current_voice = voice
+            self.update_idletasks()  # Fuerza el redibujado
             self.show_profile(username=username, email=email)
             local_db.update_session(email)
             self.app.clearHome()
@@ -371,22 +403,22 @@ class AccountScreen(tk.Frame):
 
         #Titulo
         title_label1 = tk.Label(popup, text="Confirmar eliminación de cuenta")
-        title_label1.pack(pady=10)
+        title_label1.grid(row=0, column=0, pady=10)
         title_label2 = tk.Label(popup, text="Esta acción es permanente")
-        title_label2.pack(pady=5)
+        title_label2.grid(row=1, column=0, pady=5)
 
         #Pedir info de cuenta
         title_label3 = tk.Label(popup, text="Para confirmar que está seguro llene los siguientes campos:")
-        title_label3.pack(pady=5)
+        title_label3.grid(row=2, column=0, pady=5)
         #Etiqueta y entrada para el correo
-        tk.Label(popup, text="Email: ").pack(pady=5)
+        tk.Label(popup, text="Email: ").grid(row=3, column=0, pady=5)
         email_entry = tk.Entry(popup)
-        email_entry.pack(pady=5)
+        email_entry.grid(row=3, column=1, pady=5)
         
         #Etiqueta y entrada para la contraseña
-        tk.Label(popup, text="Contraseña: ").pack(pady=5)
+        tk.Label(popup, text="Contraseña: ").grid(row=4, column=0, pady=5)
         password_entry = tk.Entry(popup, show="*")
-        password_entry.pack(pady=5)
+        password_entry.grid(row=4, column=1, pady=5)
 
         def mini_toggle_password():
             show = "" if password_entry.cget("show") == "*" else "*"
@@ -394,8 +426,8 @@ class AccountScreen(tk.Frame):
 
         # Botón para mostrar/ocultar contraseña
         show_password_btn = tk.Button(popup, text="Mostrar", command=mini_toggle_password)
-        show_password_btn.pack()
-
+        show_password_btn.grid(row=5, column=0, columnspan=2, pady=10)
+        
         def submit_form():
             email = email_entry.get()
             password = password_entry.get()
@@ -412,7 +444,11 @@ class AccountScreen(tk.Frame):
             else:
                 messagebox.showerror("Campos incompletos", "Complete todos los campos porfavor")
         #Botón de confirmación
-        tk.Button(popup, text="Confirmar eliminación de cuenta", command=submit_form).pack(pady=20)
+        tk.Button(popup, text="Confirmar eliminación de cuenta", command=submit_form).grid(row=6, column=0, columnspan=2, pady=10)
+
+        # Botón de cancelación
+        cancel_btn = tk.Button(popup, text="Cancelar", command=popup.destroy)
+        cancel_btn.grid(row=7, column=0, columnspan=2, pady=10)
 
         popup.transient(app)    # Asegura que la ventana principal esté detrás del popup
         popup.grab_set          # Bloquea la ventana principal hasta que el popup se cierre
@@ -448,6 +484,10 @@ class Application(tk.Tk):
             self.frames[Screen] = frame
             #Los frames se apilan
             frame.grid(row=0, column=0, sticky="nsew")  
+        
+        # Configurar el peso de las filas y columnas para el diseño responsivo
+        self.grid_rowconfigure(0, weight=1)  # Hacer que la fila 0 (donde se colocan los frames) se expanda
+        self.grid_columnconfigure(0, weight=1)  # Hacer que la columna 0 se expanda
 
         self.show_frame(HomeScreen)   #Se inicia en la pantalla principal
         ###Reconsturir la conversación anterior###
