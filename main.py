@@ -72,7 +72,7 @@ def process_text(recognized_text):
         ### Seleccionar modelo online o local
         if internet_checker.internet_status:
         ### LLM Online ###
-            response = ask_to_openai(recognized_text)
+            response = ask_to_openai(recognized_text, app_instance.master.current_user)
         else:
         ### LLM local ###
             contexto = local_db.recuperar_contexto(app_instance.master.current_email)

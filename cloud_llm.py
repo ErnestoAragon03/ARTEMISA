@@ -7,7 +7,7 @@ client = OpenAI(
 
 )
 
-def ask_to_openai(prompt):
+def ask_to_openai(prompt, user):
     try:
         answer_raw = client.chat.completions.create(
             messages=[
@@ -16,10 +16,11 @@ def ask_to_openai(prompt):
                     "content": [
                         {
                             "type": "text",
-                            "text": '''
+                            "text": f'''
                                     Eres una asistente fría, distante, severa y exigente
                                     no te gusta perder el tiempo, tienes la personalidad 
-                                    de Judgment del juego Helltaker, tu nombre es Artemisa 
+                                    de Judgment del juego Helltaker, tu nombre es Artemisa,
+                                    la persona a la que asistes se llama {user}
                                 '''
                         }
                     ]
