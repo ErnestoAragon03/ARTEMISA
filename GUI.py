@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import ttk
 from threading import Thread
 import main
 import local_db
@@ -137,8 +138,8 @@ class HomeScreen(tk.Frame):
 class AccountScreen(tk.Frame):
     def __init__(self, parent, app):
         super().__init__(parent)
-        self.app = app 
-        
+        self.app = app
+        self.config(bg=azul_marino, highlightbackground=azul_marino)
         #Subpantallas de AccountScreen
         self.login_screen = self.init_login_screen()
         self.register_screen = self.init_register_screen()
@@ -155,7 +156,7 @@ class AccountScreen(tk.Frame):
     def init_login_screen(self):
         frame = tk.Frame(self)
         frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)  # Asegurarse de agregar el frame a la cuadrícula
-        
+        frame.config(bg=azul_marino, highlightbackground=azul_marino)
 
         title_label = tk.Label(frame, text="Iniciar Sesión", font=("Arial", 18))
         title_label.grid(row=0, column=0, pady=10)
@@ -258,37 +259,52 @@ class AccountScreen(tk.Frame):
     def init_profile_screen(self):
         frame = tk.Frame(self)
         frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)  # Asegúrate de agregar el frame a la cuadrícula
+        frame.config(bg=azul_marino, highlightbackground=azul_marino)
 
-        title_label = tk.Label(frame, text="Perfil", font=("Arial", 18))
+        title_label = tk.Label(frame, text="Perfil", font=("Arial", 18), foreground=white, background=azul_marino, highlightbackground=azul_marino)
         title_label.grid(row=0, column=0, pady=10)
 
         # Mostrar nombre de usuario
-        self.user_label = tk.Label(frame, text="Usuario: ")
+        self.user_label = tk.Label(frame, text="Usuario: ", foreground=white, background=azul_marino, highlightbackground=azul_marino)
         self.user_label.grid(row=1, column=0, pady=5)
 
         # Mostrar email
-        self.email_label = tk.Label(frame, text="Email: ")
+        self.email_label = tk.Label(frame, text="Email: ", foreground=white, background=azul_marino, highlightbackground=azul_marino)
         self.email_label.grid(row=2, column=0, pady=5)
 
         # Opción Menu para mostrar voces
         self.selected_voice = tk.StringVar(self)
         self.selected_voice.set(self.app.current_voice)  # Opción default
 
-        voices = ["Nova", "Alloy", "Echo", "Fable", "Onyx", "Shimmer"]
-        self.dropdown = tk.OptionMenu(frame, self.selected_voice, *voices, command=self.app.change_voice)
+        #Opciones del Option Menu
+        voices = ["", "Nova", "Alloy", "Echo", "Fable", "Onyx", "Shimmer"]
+
+        #Modificar estilos del Option Menu
+        style = ttk.Style(frame)
+        style.theme_use('default')
+
+        # Configurar el fondo y el color cuando el mouse está encima
+        style.configure('Hover.TMenubutton', background=gris_oscuro, foreground=white)
+        style.map('Hover.TMenubutton', background=[('active', 'lightblue')])
+        # Cambiar el color del fondo del menu (desplegable)
+        self.dropdown = ttk.OptionMenu(frame, self.selected_voice, *voices, command=self.app.change_voice, style='Hover.TMenubutton')
+
+        menu = self.dropdown['menu']
+        menu.configure(bg=azul_marino, fg='white')
+
         self.dropdown.grid(row=3, column=0, pady=10)
 
         # Botón de cierre de sesión
-        logout_btn = tk.Button(frame, text="Cerrar Sesión", command=self.logout)
+        logout_btn = tk.Button(frame, text="Cerrar Sesión", command=self.logout, foreground=white, background=gris_oscuro, highlightbackground=azul_marino)
         logout_btn.grid(row=4, column=0, pady=10)
 
         # Botón de eliminación de cuenta
-        delete_btn = tk.Button(frame, text="Eliminar Cuenta", command=self.confirm_deletion)
+        delete_btn = tk.Button(frame, text="Eliminar Cuenta", command=self.confirm_deletion, foreground=white, background=gris_oscuro, highlightbackground=azul_marino)
         delete_btn.grid(row=5, column=0, pady=10)
 
         ### Barra de navegación ###
         ## Botón para Pantalla Principal ##
-        home_button = tk.Button(frame, text="Home", command=lambda: self.app.show_frame(HomeScreen))
+        home_button = tk.Button(frame, text="Home", command=lambda: self.app.show_frame(HomeScreen), foreground=white, background=gris_oscuro, highlightbackground=azul_marino)
         home_button.grid(row=6, column=0, pady=10)
 
         # Configurar el peso de las filas y columnas para el diseño responsivo
