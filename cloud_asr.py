@@ -22,7 +22,7 @@ client = OpenAI(
 samplerate = 16000          #Frecuencia de muestreo (Hz)
 frame_duration = 30          #Duración de frame (ms)
 frame_size = int (samplerate * frame_duration / 1000)
-silence_threshold = 5    #Segundos de silencio antes de detener la grabación
+silence_threshold = 2    #Segundos de silencio antes de detener la grabación
 vad = webrtcvad.Vad(1)     #Nivel de sensibilidad (VAD)
 
 # Inicialización de la cola de audio y tiempos de espera
