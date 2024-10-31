@@ -533,6 +533,10 @@ class Application(tk.Tk):
         height = self.winfo_screenheight()
         self.geometry("%dx%d" % (width, height))
 
+        ###Cargar imagenes###
+        ArtemisaLogo = tk.PhotoImage(file="Icons/ArtemisaLogo.png")
+        self.iconphoto(True, ArtemisaLogo)
+
         ###Diccionario para almacenar pantallas (Frames)###
         self.frames = {}
         ###Crear Frames para cada pantalla ###

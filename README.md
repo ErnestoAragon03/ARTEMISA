@@ -1,3 +1,12 @@
+# Introduction
+## Who am I?
+### Project realized by Ernesto Aragón
+### github: ErnestoAragon03
+
+## What is this proyect?
+
+
+
 # Attributions
 
 ## Icons:
