@@ -59,11 +59,12 @@ class HomeScreen(tk.Frame):
         self.sendText = tk.PhotoImage(file="Icons/SendText.png")
         self.micActive = tk.PhotoImage(file="Icons/MicActive.png")
         self.micMuted = tk.PhotoImage(file="Icons/MicMuted.png")
+        self.ttsSilenced = tk.PhotoImage(file="Icons/SilenceTTS.png")
         ###Botón para enviar input de texto###
         send_button = tk.Button(botton_frame, image=self.sendText, command=self.send_text, background=gris_oscuro, foreground=white, highlightbackground=gris_oscuro)
         send_button.grid(row=0, column=1, padx=5, sticky="nsew")
         ###Botón para terminar TTS ###
-        end_tts_button = tk.Button(botton_frame, text="Silenciar TTS", command=self.interrupt_tts, background=gris_oscuro, foreground=white, highlightbackground=gris_oscuro)
+        end_tts_button = tk.Button(botton_frame, image=self.ttsSilenced, command=self.interrupt_tts, background=gris_oscuro, foreground=white, highlightbackground=gris_oscuro)
         end_tts_button.grid(row=0, column=2, padx=5, sticky="nsew")
         ###Botón ASR###
         self.mic_button = tk.Button(botton_frame, image=self.micActive, command= self.toggle_mic, background=gris_oscuro, foreground=white, highlightbackground=gris_oscuro)

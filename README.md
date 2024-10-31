@@ -12,3 +12,7 @@
 - <a href="https://www.flaticon.es/iconos-gratis/enviar" title="enviar iconos">Enviar iconos creados por Bingge Liu - Flaticon</a>
 
 - <a href="https://www.flaticon.es/iconos-gratis/mudo" title="mudo iconos">Mudo iconos creados por Kharisma - Flaticon</a>
+
+- <a href="https://www.flaticon.es/iconos-gratis/microfono" title="micrófono iconos">Micrófono iconos creados por Freepik - Flaticon</a>
+
+- <a href="https://www.flaticon.es/iconos-gratis/mudo" title="mudo iconos">Mudo iconos creados por pictranoosa - Flaticon</a>
