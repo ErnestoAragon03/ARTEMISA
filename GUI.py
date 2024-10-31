@@ -11,6 +11,7 @@ mic_active = True
 azul_marino = "#000630"
 gris_oscuro = "#1e262b"
 white = "white"
+rojo_oscuro = "#640000"
 
 class HomeScreen(tk.Frame):
     def __init__(self, parent, controller):
@@ -54,8 +55,10 @@ class HomeScreen(tk.Frame):
         self.text_input = tk.Entry(botton_frame, width=150, background=gris_oscuro, foreground=white, highlightbackground=gris_oscuro)
         self.text_input.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
         self.text_input.bind("<Return>", self.send_text)  #Vincular la tecla Enter para enviar el texto
+        ###Cargar Imagenes###
+        self.sendText = tk.PhotoImage(file="Icons/SendText.png")
         ###Botón para enviar input de texto###
-        send_button = tk.Button(botton_frame, text="Enviar", command=self.send_text, background=gris_oscuro, foreground=white, highlightbackground=gris_oscuro)
+        send_button = tk.Button(botton_frame, image=self.sendText, command=self.send_text, background=gris_oscuro, foreground=white, highlightbackground=gris_oscuro)
         send_button.grid(row=0, column=1, padx=5, sticky="nsew")
         ###Botón para terminar TTS ###
         end_tts_button = tk.Button(botton_frame, text="Silenciar TTS", command=self.interrupt_tts, background=gris_oscuro, foreground=white, highlightbackground=gris_oscuro)
@@ -312,7 +315,7 @@ class AccountScreen(tk.Frame):
         logout_btn.grid(row=4, column=0, pady=10)
 
         # Botón de eliminación de cuenta
-        delete_btn = tk.Button(frame, text="Eliminar Cuenta", command=self.confirm_deletion, foreground=white, background=gris_oscuro, highlightbackground=azul_marino)
+        delete_btn = tk.Button(frame, text="Eliminar Cuenta", command=self.confirm_deletion, foreground=white, background=rojo_oscuro, highlightbackground=azul_marino)
         delete_btn.grid(row=5, column=0, pady=10)
 
         ### Barra de navegación ###
@@ -320,7 +323,7 @@ class AccountScreen(tk.Frame):
         #Cargar ícono
         self.home_icon_profile = tk.PhotoImage(file="Icons/Home.png")
         home_button = tk.Button(frame, image=self.home_icon_profile, command=lambda: self.app.show_frame(HomeScreen), foreground=white, background=gris_oscuro, highlightbackground=azul_marino)
-        home_button.grid(row=6, column=1, pady=10)
+        home_button.grid(row=6, column=0, pady=5)
 
         # Configurar el peso de las filas y columnas para el diseño responsivo
         self.grid_rowconfigure(0, weight=1)
@@ -445,33 +448,39 @@ class AccountScreen(tk.Frame):
         popup = tk.Toplevel()
         popup.title("Eliminar cuenta")
         popup.geometry("450x350")
+        popup.config(background=azul_marino)
 
         #Titulo
-        title_label1 = tk.Label(popup, text="Confirmar eliminación de cuenta")
-        title_label1.grid(row=0, column=0, pady=10)
-        title_label2 = tk.Label(popup, text="Esta acción es permanente")
-        title_label2.grid(row=1, column=0, pady=5)
+        title_label1 = tk.Label(popup, text="Confirmar eliminación de cuenta", background=azul_marino, foreground=white)
+        title_label1.grid(row=0, column=1, pady=10)
+        title_label2 = tk.Label(popup, text="Esta acción es permanente", background=azul_marino,foreground=white)
+        title_label2.grid(row=1, column=1, pady=5)
 
         #Pedir info de cuenta
-        title_label3 = tk.Label(popup, text="Para confirmar que está seguro llene los siguientes campos:")
-        title_label3.grid(row=2, column=0, pady=5)
+        title_label3 = tk.Label(popup, text="Para confirmar que está seguro llene los siguientes campos:", background=azul_marino, foreground=white)
+        title_label3.grid(row=2, column=1, pady=5)
         #Etiqueta y entrada para el correo
-        tk.Label(popup, text="Email: ").grid(row=3, column=0, pady=5)
-        email_entry = tk.Entry(popup)
+        tk.Label(popup, text="Email: ", background=azul_marino, foreground=white).grid(row=3, column=0, pady=5)
+        email_entry = tk.Entry(popup, background=azul_marino, foreground=white)
         email_entry.grid(row=3, column=1, pady=5)
         
         #Etiqueta y entrada para la contraseña
-        tk.Label(popup, text="Contraseña: ").grid(row=4, column=0, pady=5)
-        password_entry = tk.Entry(popup, show="*")
+        tk.Label(popup, text="Contraseña: ", background=azul_marino, foreground=white).grid(row=4, column=0, pady=5)
+        password_entry = tk.Entry(popup, show="*", background=azul_marino, foreground=white)
         password_entry.grid(row=4, column=1, pady=5)
 
         def mini_toggle_password():
-            show = "" if password_entry.cget("show") == "*" else "*"
+            if password_entry.cget("show") == "*":
+                show = "" 
+                show_password_btn.config(image=self.showed_password)
+            else:
+                show = "*"
+                show_password_btn.config(image=self.hidden_password)
             password_entry.config(show=show)
 
         # Botón para mostrar/ocultar contraseña
-        show_password_btn = tk.Button(popup, text="Mostrar", command=mini_toggle_password)
-        show_password_btn.grid(row=5, column=0, columnspan=2, pady=10)
+        show_password_btn = tk.Button(popup, image=self.hidden_password, command=mini_toggle_password, background=azul_marino)
+        show_password_btn.grid(row=4, column=3, pady=10)
         
         def submit_form():
             email = email_entry.get()
@@ -489,11 +498,11 @@ class AccountScreen(tk.Frame):
             else:
                 messagebox.showerror("Campos incompletos", "Complete todos los campos porfavor")
         #Botón de confirmación
-        tk.Button(popup, text="Confirmar eliminación de cuenta", command=submit_form).grid(row=6, column=0, columnspan=2, pady=10)
+        tk.Button(popup, text="Confirmar eliminación de cuenta", command=submit_form, background=rojo_oscuro, foreground=white).grid(row=5, column=1, pady=10)
 
         # Botón de cancelación
-        cancel_btn = tk.Button(popup, text="Cancelar", command=popup.destroy)
-        cancel_btn.grid(row=7, column=0, columnspan=2, pady=10)
+        cancel_btn = tk.Button(popup, text="Cancelar", command=popup.destroy, background=azul_marino, foreground=white)
+        cancel_btn.grid(row=6, column=1, pady=10)
 
         popup.transient(app)    # Asegura que la ventana principal esté detrás del popup
         popup.grab_set          # Bloquea la ventana principal hasta que el popup se cierre
