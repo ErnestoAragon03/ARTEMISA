@@ -56,7 +56,7 @@ def process_voice_activity(data):
 def capture_audio():
     global last_voice_time
     while cloud_tts.is_tts_playing:
-        time.sleep(1)
+        time.sleep(2)
     #Reproducir sonido de activación
     play_activation_sound() 
     #Iniciar grabación

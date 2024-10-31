@@ -66,7 +66,9 @@ class HomeScreen(tk.Frame):
 
         ###Barra de navegación###
         ##Botón para Pantalla de cuenta##
-        account_button = tk.Button(self, text="Cuenta", command=lambda: controller.show_frame(AccountScreen), background=gris_oscuro, foreground=white, highlightbackground=gris_oscuro)
+        #Cargar imagen
+        self.account_icon = tk.PhotoImage(file="Icons/Account.png")
+        account_button = tk.Button(self, image=self.account_icon, command=lambda: controller.show_frame(AccountScreen), background=gris_oscuro, foreground=white, highlightbackground=gris_oscuro)
         account_button.grid(row=3, column=0, pady=40)
 
         # Configurar el peso de las filas y columnas para el diseño responsivo
@@ -140,6 +142,10 @@ class AccountScreen(tk.Frame):
         super().__init__(parent)
         self.app = app
         self.config(bg=azul_marino, highlightbackground=azul_marino)
+
+         #Carga de imagenes
+        self.hidden_password = tk.PhotoImage(file="Icons/HiddenPassword.png")
+        self.showed_password = tk.PhotoImage(file="Icons/ShowedPassword.png")
         #Subpantallas de AccountScreen
         self.login_screen = self.init_login_screen()
         self.register_screen = self.init_register_screen()
@@ -159,39 +165,38 @@ class AccountScreen(tk.Frame):
         frame.config(bg=azul_marino, highlightbackground=azul_marino)
 
         title_label = tk.Label(frame, text="Iniciar Sesión", font=("Arial", 18), background=azul_marino, foreground=white)
-        title_label.grid(row=0, column=0, pady=10)
+        title_label.grid(row=0, column=1, pady=10)
 
         # Campos de entradas
         email_label = tk.Label(frame, text="Email Asociado", background=azul_marino, foreground=white)
-        email_label.grid(row=1, column=0, pady=5)
+        email_label.grid(row=1, column=1, pady=5)
         self.email_entry = tk.Entry(frame, background=gris_oscuro, foreground=white)
-        self.email_entry.grid(row=2, column=0, pady=5)
+        self.email_entry.grid(row=2, column=1, pady=5)
         self.email_entry.bind("<Return>", self.login)  # Vincular la tecla Enter para enviar datos al login
 
         password_label = tk.Label(frame, text="Contraseña", background=azul_marino, foreground=white)
-        password_label.grid(row=3, column=0, pady=5)
+        password_label.grid(row=3, column=1, pady=5)
         self.password_entry = tk.Entry(frame, show="*", background=gris_oscuro, foreground=white)
-        self.password_entry.grid(row=4, column=0, pady=5)
+        self.password_entry.grid(row=4, column=1, pady=5)
         self.password_entry.bind("<Return>", self.login)  # Vincular la tecla Enter para enviar datos al login
         
         # Botón para mostrar/ocultar contraseña
-        show_password_btn = tk.Button(frame, text="Mostrar", command=self.toggle_password, background=gris_oscuro, foreground=white)
-        show_password_btn.grid(row=5, column=0, pady=5)
+        self.show_password_login_btn = tk.Button(frame, image=self.hidden_password, command=self.toggle_password, background=gris_oscuro, foreground=white)
+        self.show_password_login_btn.grid(row=4, column=2, pady=5)
 
         # Botones de acciones
         login_btn = tk.Button(frame, text="Iniciar sesión", command=self.login, background=gris_oscuro, foreground=white)
-        login_btn.grid(row=6, column=0, pady=10)
+        login_btn.grid(row=6, column=0, pady=50)
 
         switch_register_btn = tk.Button(frame, text="Crear cuenta", command=self.show_register, background=gris_oscuro, foreground=white)
-        switch_register_btn.grid(row=7, column=0, pady=5)
+        switch_register_btn.grid(row=6, column=2, pady=50)
 
         ### Barra de navegación ###
         ## Botón para Pantalla Principal ##
         #Cargar ícono
-        self.home_icon = tk.PhotoImage(file="Icons/Home.png")
-
-        home_button = tk.Button(frame, image=self.home_icon, command=lambda: self.app.show_frame(HomeScreen), background=azul_marino, foreground=white)
-        home_button.grid(row=8, column=0, pady=10)
+        self.home_icon_login = tk.PhotoImage(file="Icons/Home.png")
+        home_button = tk.Button(frame, image=self.home_icon_login, command=lambda: self.app.show_frame(HomeScreen), foreground=white, background=gris_oscuro, highlightbackground=azul_marino)
+        home_button.grid(row=8, column=1, pady=10)
 
         # Configurar el peso de las filas y columnas para el diseño responsivo
         self.grid_rowconfigure(0, weight=1)
@@ -208,48 +213,52 @@ class AccountScreen(tk.Frame):
         frame.config(bg=azul_marino, highlightbackground=azul_marino)
 
         title_label = tk.Label(frame, text="Crear Cuenta", font=("Arial", 18), background=azul_marino, foreground=white)
-        title_label.grid(row=0, column=0, pady=10)
+        title_label.grid(row=0, column=1, pady=10)
 
         # Campos de entrada
         email_label = tk.Label(frame, text="Email", background=azul_marino, foreground=white)
-        email_label.grid(row=1, column=0, pady=5)
+        email_label.grid(row=1, column=1, pady=5)
         self.register_email_entry = tk.Entry(frame, background=gris_oscuro, foreground=white)
-        self.register_email_entry.grid(row=2, column=0, pady=5)
+        self.register_email_entry.grid(row=2, column=1, pady=5)
         self.register_email_entry.bind("<Return>", self.register)  # Vincular la tecla Enter para enviar datos al Register
 
-        username_label = tk.Label(frame, text="Nombre de usuario (Este será el nombre por el que el asistente lo llamará)", background=azul_marino, foreground=white)
-        username_label.grid(row=3, column=0, pady=5)
+        username_label1 = tk.Label(frame, text="Nombre de usuario", background=azul_marino, foreground=white)
+        username_label2 = tk.Label(frame, text="(Este será el nombre por el que el asistente lo llamará)", background=azul_marino, foreground=white)
+        username_label1.grid(row=3, column=1, pady=5)
+        username_label2.grid(row=4, column=1, pady=1)
         self.register_username_entry = tk.Entry(frame, background=gris_oscuro, foreground=white)
-        self.register_username_entry.grid(row=4, column=0, pady=5)
+        self.register_username_entry.grid(row=5, column=1, pady=5)
         self.register_username_entry.bind("<Return>", self.register)  # Vincular la tecla Enter para enviar datos al Register
 
         password_label = tk.Label(frame, text="Contraseña", background=azul_marino, foreground=white)
-        password_label.grid(row=5, column=0, pady=5)
+        password_label.grid(row=6, column=1, pady=5)
         self.register_password_entry = tk.Entry(frame, show="*", background=gris_oscuro, foreground=white)
-        self.register_password_entry.grid(row=6, column=0, pady=5)
+        self.register_password_entry.grid(row=7, column=1, pady=5)
         self.register_password_entry.bind("<Return>", self.register)  # Vincular la tecla Enter para enviar datos al Register
 
         confirm_password_label = tk.Label(frame, text="Confirmar contraseña", background=azul_marino, foreground=white)
-        confirm_password_label.grid(row=7, column=0, pady=5)
+        confirm_password_label.grid(row=8, column=1, pady=5)
         self.confirm_password_entry = tk.Entry(frame, show="*", background=gris_oscuro, foreground=white)
-        self.confirm_password_entry.grid(row=8, column=0, pady=5)
+        self.confirm_password_entry.grid(row=9, column=1, pady=5)
         self.confirm_password_entry.bind("<Return>", self.register)  # Vincular la tecla Enter para enviar datos al Register
 
         # Botón para mostrar/ocultar contraseña
-        show_password_btn = tk.Button(frame, text="Mostrar", command=self.toggle_password, background=gris_oscuro, foreground=white)
-        show_password_btn.grid(row=9, column=0, pady=5)
+        self.show_password_register_btn = tk.Button(frame, image=self.hidden_password, command=self.toggle_password, background=gris_oscuro, foreground=white)
+        self.show_password_register_btn.grid(row=7, column=2, pady=5)
 
         # Botones de acciones
         register_btn = tk.Button(frame, text="Crear cuenta", command=self.register, background=gris_oscuro, foreground=white)
-        register_btn.grid(row=10, column=0, pady=10)
+        register_btn.grid(row=11, column=0, pady=50)
 
         switch_login_btn = tk.Button(frame, text="Iniciar sesión", command=self.show_login, background=gris_oscuro, foreground=white)
-        switch_login_btn.grid(row=11, column=0, pady=5)
+        switch_login_btn.grid(row=11, column=2, pady=50)
 
         ### Barra de navegación ###
         ## Botón para Pantalla Principal ##
-        home_button = tk.Button(frame, text="Home", command=lambda: self.app.show_frame(HomeScreen), background=gris_oscuro, foreground=white)
-        home_button.grid(row=12, column=0, pady=10)
+        #Cargar ícono
+        self.home_icon_register = tk.PhotoImage(file="Icons/Home.png")
+        home_button = tk.Button(frame, image=self.home_icon_register, command=lambda: self.app.show_frame(HomeScreen), foreground=white, background=gris_oscuro, highlightbackground=azul_marino)
+        home_button.grid(row=12, column=1, pady=5)
 
         # Configurar el peso de las filas y columnas para el diseño responsivo
         self.grid_rowconfigure(0, weight=1)
@@ -308,8 +317,10 @@ class AccountScreen(tk.Frame):
 
         ### Barra de navegación ###
         ## Botón para Pantalla Principal ##
-        home_button = tk.Button(frame, text="Home", command=lambda: self.app.show_frame(HomeScreen), foreground=white, background=gris_oscuro, highlightbackground=azul_marino)
-        home_button.grid(row=6, column=0, pady=10)
+        #Cargar ícono
+        self.home_icon_profile = tk.PhotoImage(file="Icons/Home.png")
+        home_button = tk.Button(frame, image=self.home_icon_profile, command=lambda: self.app.show_frame(HomeScreen), foreground=white, background=gris_oscuro, highlightbackground=azul_marino)
+        home_button.grid(row=6, column=1, pady=10)
 
         # Configurar el peso de las filas y columnas para el diseño responsivo
         self.grid_rowconfigure(0, weight=1)
@@ -341,7 +352,15 @@ class AccountScreen(tk.Frame):
 
     #Función de mostrar/ocultar contraseña
     def toggle_password(self):
-        show = "" if self.password_entry.cget("show") == "*" else "*"
+        if self.password_entry.cget("show") == "*":
+            show = ""
+            self.show_password_login_btn.config(image=self.showed_password)
+            self.show_password_register_btn.config(image=self.showed_password)
+            
+        else:
+            show = "*"
+            self.show_password_login_btn.config(image=self.hidden_password)
+            self.show_password_register_btn.config(image=self.hidden_password)
         self.password_entry.config(show=show)
         self.register_password_entry.config(show=show)
         self.confirm_password_entry.config(show=show)
@@ -353,13 +372,12 @@ class AccountScreen(tk.Frame):
         if email == '' or password == '':
             messagebox.showerror("Campos incompletos", "Complete todos los campos porfavor")
         elif local_db.authenticate_user(email, password):
-            messagebox.showinfo("Éxito", "¡Sesión iniciada exitosamente!")
             username = local_db.get_user(email=email)
             voice = local_db.get_voice(email=email)
             self.app.current_user = username
             self.app.current_email = email
             self.app.current_voice = voice
-            self.update_idletasks()  # Fuerza el redibujado
+            messagebox.showinfo("Éxito", "¡Sesión iniciada exitosamente!")
             self.show_profile(username=username, email=email)
             local_db.update_session(email)
             self.app.clearHome()
