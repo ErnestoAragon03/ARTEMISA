@@ -30,7 +30,7 @@ def insertar_consulta(question, answer, email):
     conn.close()
 
 ###Función para recuperar el contexto (prioriza lo más reciente)###
-def get_context(email, consults_limit=10):
+def get_context(email, consults_limit=5):
     context = []
     conn = sqlite3.connect('artemisa_local_db')
     cursor = conn.cursor()
