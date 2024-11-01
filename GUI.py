@@ -537,7 +537,7 @@ class AccountScreen(tk.Frame):
     
     def change_personality(self):
         personality_input = self.personality_entry.get("1.0", tk.END).strip()
-        if local_db.changed_personality(self.app.current_email, self.app.current_user, personality_input):
+        if local_db.change_personality(self.app.current_email, self.app.current_user, personality_input):
             messagebox.showinfo("Personalidad Aceptada", "La nueva personalidad ha sido ingresada, que disfrute de su nuevo asistente")
         else:
             messagebox.showerror("Personalidad Rechazada", "Un error inesperado impidió e cambio de personalidad, intentelo de nuevo más tarde")
