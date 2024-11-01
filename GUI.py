@@ -281,15 +281,15 @@ class AccountScreen(tk.Frame):
         frame.config(bg=azul_marino, highlightbackground=azul_marino)
 
         title_label = tk.Label(frame, text="Perfil", font=("Arial", 18), foreground=white, background=azul_marino, highlightbackground=azul_marino)
-        title_label.grid(row=0, column=0, pady=10)
+        title_label.grid(row=0, column=1, pady=10)
 
         # Mostrar nombre de usuario
         self.user_label = tk.Label(frame, text="Usuario: ", foreground=white, background=azul_marino, highlightbackground=azul_marino)
-        self.user_label.grid(row=1, column=0, pady=5)
+        self.user_label.grid(row=1, column=1, pady=5)
 
         # Mostrar email
         self.email_label = tk.Label(frame, text="Email: ", foreground=white, background=azul_marino, highlightbackground=azul_marino)
-        self.email_label.grid(row=2, column=0, pady=5)
+        self.email_label.grid(row=2, column=1, pady=5)
 
         # Opción Menu para mostrar voces
         self.selected_voice = tk.StringVar(self)
@@ -311,22 +311,35 @@ class AccountScreen(tk.Frame):
         menu = self.dropdown['menu']
         menu.configure(bg=azul_marino, fg='white')
 
-        self.dropdown.grid(row=3, column=0, pady=10)
+        self.dropdown.grid(row=3, column=1, pady=10)
+        ###Etiquetas para indicar camgbio de personalidad###
+        tk.Label(frame, text="Cambio de personalidad", bg=azul_marino, fg=white).grid(row=4, column=1)
+        tk.Label(frame, text="Ingrese la personalidad que desea en su asistente", bg=azul_marino, fg=white).grid(row=5, column=1)
+        tk.Label(frame, text='Use estructuras del tipo: "Eres un asistente que...", "Tienes la personalidad de..."', bg=azul_marino, fg=white).grid(row=6, column=1)
+        ###Sección para retornar a la personalidad default###
+        self.default_personality = tk.Button(frame, text="Personalidad Original", command=self.return_personality, bg=azul_marino, fg=white)
+        self.default_personality.grid(row=8, column=0, pady=10)
+        ###Sección de Cambio de personalidad###
+        self.personality_entry = tk.Text(frame, height=5, width=30, bg=azul_marino, foreground=white)
+        self.personality_entry.grid(row=7, column=1)
+
+        self.change_personality_btn = tk.Button(frame, text="Cambiar Personalidad", command=self.change_personality, bg=azul_marino, fg=white)
+        self.change_personality_btn.grid(row=8, column=2, pady=10)
 
         # Botón de cierre de sesión
         logout_btn = tk.Button(frame, text="Cerrar Sesión", command=self.logout, foreground=white, background=gris_oscuro, highlightbackground=azul_marino)
-        logout_btn.grid(row=4, column=0, pady=10)
+        logout_btn.grid(row=9, column=1, pady=10)
 
         # Botón de eliminación de cuenta
         delete_btn = tk.Button(frame, text="Eliminar Cuenta", command=self.confirm_deletion, foreground=white, background=rojo_oscuro, highlightbackground=azul_marino)
-        delete_btn.grid(row=5, column=0, pady=10)
+        delete_btn.grid(row=10, column=1, pady=10)
 
         ### Barra de navegación ###
         ## Botón para Pantalla Principal ##
         #Cargar ícono
         self.home_icon_profile = tk.PhotoImage(file="Icons/Home.png")
         home_button = tk.Button(frame, image=self.home_icon_profile, command=lambda: self.app.show_frame(HomeScreen), foreground=white, background=gris_oscuro, highlightbackground=azul_marino)
-        home_button.grid(row=6, column=0, pady=5)
+        home_button.grid(row=11, column=1, pady=5)
 
         # Configurar el peso de las filas y columnas para el diseño responsivo
         self.grid_rowconfigure(0, weight=1)
@@ -349,6 +362,11 @@ class AccountScreen(tk.Frame):
         self.user_label.config(text=f"Usuario: {username}")
         self.email_label.config(text=f"Email: {email}")
         self.profile_screen.grid()
+        if local_db.changed_personality(self.app.current_email, self.app.current_user):
+            self.personality_entry.delete("1.0", tk.END)
+            self.personality_entry.insert("1.0", local_db.get_personality(self.app.current_email))
+        else:
+            self.personality_entry.delete("1.0", tk.END)
 
     #Función para limpiar la pantalla de subpantallas
     def clear_frame(self):
@@ -516,6 +534,17 @@ class AccountScreen(tk.Frame):
         self.app.logout(Deleted=True)
         self.reset_fields()
         self.show_login()
+    
+    def change_personality(self):
+        personality_input = self.personality_entry.get("1.0", tk.END).strip()
+        if local_db.changed_personality(self.app.current_email, self.app.current_user, personality_input):
+            messagebox.showinfo("Personalidad Aceptada", "La nueva personalidad ha sido ingresada, que disfrute de su nuevo asistente")
+        else:
+            messagebox.showerror("Personalidad Rechazada", "Un error inesperado impidió e cambio de personalidad, intentelo de nuevo más tarde")
+        
+    def return_personality(self):
+        local_db.change_to_default_personality(self.app.current_email, self.app.current_user)
+        messagebox.showinfo("Personalidad Restaurada", "Personalidad original restaurada, back in black baby!")
 
 
 class Application(tk.Tk):

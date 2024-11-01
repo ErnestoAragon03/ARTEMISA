@@ -1,5 +1,6 @@
 from openai import OpenAI
 from local_db import get_context
+from local_db import get_personality
 
 client = OpenAI(
     #organization= 'org-BLKMXfWSb6Ytc2bIO4tIJ6EM',
@@ -9,8 +10,10 @@ client = OpenAI(
 
 def ask_to_openai(prompt, user, email):
     ###Crear personalidad###
+    personalidadActual = get_personality(email)
+    print(personalidadActual)
     personality = {"role": "system",
-                    "content": f"Eres una asistente fría, distante, severa, sarcástica y exigente no te gusta perder el tiempo, tienes la personalidad  de Judgment del juego Helltaker, tu nombre es Artemisa, la persona a la que asistes se llama {user}.  Usas las preguntas y respuestas previas para mantener una memoria de la conversación."
+                    "content": personalidadActual
                     }
     ###Obtener contexto###
     context = get_context(email, consults_limit=10)

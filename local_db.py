@@ -10,6 +10,7 @@ def init_db():
                    username TEXT NOT NULL,
                    password TEXT NOT NULL,
                    voice TEXT,
+                   personality TEXT,
                    logged BOOLEAN)''')
     
     #Crear tabla de consultas recientes
@@ -82,13 +83,14 @@ def get_answers(email):
 
 
 ###Crear cuenta###
-def add_user(useraname, email, password):
+def add_user(username, email, password):
     try:
         conn = sqlite3.connect('artemisa_local_db')
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO local_users (username, email, password, voice, logged, active) VALUES (?, ?, ?, ?, ?, ?)", (useraname, email, password, "Nova", True, True))
+        cursor.execute("INSERT INTO local_users (username, email, password, voice, logged) VALUES (?, ?, ?, ?, ?)", (username, email, password, "Nova", True))
         conn.commit()
         conn.close()
+        change_to_default_personality(email, username)  #Coloca la personalidad default
         return True
     except sqlite3.IntegrityError:      #Ya existe una cuenta con ese correo
         return False
@@ -96,7 +98,7 @@ def add_user(useraname, email, password):
 def authenticate_user(email, password):
     conn = sqlite3.connect('artemisa_local_db')
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM local_users WHERE email = ? AND password = ? AND active = ?", (email, password, 1))
+    cursor.execute("SELECT * FROM local_users WHERE email = ? AND password = ?", (email, password))
     user = cursor.fetchone()
     conn.close()
     return user is not None
@@ -173,3 +175,47 @@ def delete_consults(email):
     cursor.execute("DELETE FROM recent_consults WHERE email=(?)", (email,))
     conn.commit()
     conn.close()
+
+###Función para ingresar nueva personalidad###
+def change_personality(email, username, personality):
+    try:
+        new_personality = personality + f".  La persona a la que asistes se llama {username}."
+        conn = sqlite3.connect('artemisa_local_db')
+        cursor = conn.cursor()
+        cursor.execute("UPDATE local_users SET personality=(?) WHERE email = (?)", (new_personality, email))
+        conn.commit()
+        conn.close()
+        return True
+    except:
+        return False
+
+
+###Función para ingresar personalidad default (La mejor)###
+def change_to_default_personality(email, username):
+    conn = sqlite3.connect('artemisa_local_db')
+    cursor = conn.cursor()
+    judgment_personality = f"Eres una asistente fría, distante, severa, sarcástica y exigente no te gusta perder el tiempo, tienes la personalidad  de Judgment del juego Helltaker, tu nombre es Artemisa, la persona a la que asistes se llama {username}.  Usas las preguntas y respuestas previas para mantener una memoria de la conversación."
+
+    cursor.execute("UPDATE local_users SET personality=(?) WHERE email=(?)", (judgment_personality, email))
+    conn.commit()
+    conn.close()
+
+def get_personality(email):
+    conn = sqlite3.connect('artemisa_local_db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT personality FROM local_users WHERE email=(?)", (email,))
+    personality = cursor.fetchone()[0]
+    conn.close()
+    if personality:
+        return personality
+    else:
+        judgment_for_guest_personality = f"Eres una asistente fría, distante, severa, sarcástica y exigente no te gusta perder el tiempo, tienes la personalidad  de Judgment del juego Helltaker, tu nombre es Artemisa, no asistes a una persona en concreto, existes para ayudar a quien sea que recurra a tus servicios.  Usas las preguntas y respuestas previas para mantener una memoria de la conversación."
+        return judgment_for_guest_personality
+    
+def changed_personality(email, username):
+    judgment_personality = f"Eres una asistente fría, distante, severa, sarcástica y exigente no te gusta perder el tiempo, tienes la personalidad  de Judgment del juego Helltaker, tu nombre es Artemisa, la persona a la que asistes se llama {username}.  Usas las preguntas y respuestas previas para mantener una memoria de la conversación."
+    if get_personality(email) == judgment_personality:
+        return False
+    else:
+        return True
+    
