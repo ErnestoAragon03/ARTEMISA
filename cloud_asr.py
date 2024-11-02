@@ -11,6 +11,7 @@ import wave
 import main
 import cloud_tts
 import os
+from logger_config import logger
 
 from asr_sounds import play_activation_sound, play_deactivation_sound
 
@@ -115,11 +116,15 @@ def capture_audio():
 
 
 def transcribe():
+    logger.info("Llegando a cloud_asr")
     transcription = ""
     try:
         transcription = capture_audio()
+        logger.info("Transcripción recibida:")
+        logger.info(transcription)
         return transcription
     except ConnectionError:
         main.alert_No_Connection()
     except Exception as e:
+        logger.error("Error en wake_up.py: %s", e)
         print("Error: ", e)

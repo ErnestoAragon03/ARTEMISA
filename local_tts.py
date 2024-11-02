@@ -9,7 +9,7 @@ def initialize_tts():
     model_path=r"C:\Users\Ernesto\AppData\Local\tts\tts_models--es--mai--tacotron2-DDC\model_file.pth"
     config_path=r"C:\Users\Ernesto\AppData\Local\tts\tts_models--es--mai--tacotron2-DDC\config.json"
     #Inicializar TTS
-    tts = TTS.api.TTS(model_path=model_path, config_path=config_path,progress_bar=False)
+    tts = TTS.api.TTS(model_path=model_path, config_path=config_path, progress_bar=False)
     return tts
 
 #Función para generar el audio

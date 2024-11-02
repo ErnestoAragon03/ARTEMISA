@@ -3,6 +3,7 @@ import sounddevice as sd
 import numpy as np
 import queue
 import main
+from logger_config import logger
 
 #Configurar cola de audio
 q = queue.Queue()
@@ -24,15 +25,21 @@ def constant_callback(indata,frames,time,status):
 
 #Función que reconoce las wake words
 def recognize_wake_word():
-    with sd.InputStream(callback=constant_callback, channels=1, samplerate=porcupine.sample_rate, blocksize=porcupine.frame_length, dtype=dtype):
-        print("Listening...")
-        while main.running:
-            pcm = q.get().flatten()
-            pcm = np.frombuffer(pcm, dtype=np.int16)
+    try:
+        logger.info("Llegando a wake_up-py")
+        with sd.InputStream(callback=constant_callback, channels=1, samplerate=porcupine.sample_rate, blocksize=porcupine.frame_length, dtype=dtype):
+            logger.info("Esperando Wake Word...")
+            print("Listening...")
+            while main.running:
+                pcm = q.get().flatten()
+                pcm = np.frombuffer(pcm, dtype=np.int16)
 
-            keyword_index = porcupine.process(pcm)
-            if keyword_index >= 0:
-                print(f"Wake word detected!")
-                return True 
-        print("Muted")
-        return False
+                keyword_index = porcupine.process(pcm)
+                if keyword_index >= 0:
+                    logger.info("Wake word detectada")
+                    print(f"Wake word detected!")
+                    return True 
+            print("Muted")
+            return False
+    except Exception as e:
+        logger.error("Error en wake_up.py: %s", e)

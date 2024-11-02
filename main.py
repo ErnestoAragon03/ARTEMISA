@@ -9,6 +9,7 @@ from cloud_llm import ask_to_openai
 from cloud_tts import generate_audio_OpenAI
 from cloud_asr import transcribe
 import threading
+from logger_config import logger
 
 #Variable global que indica si se sigue ejecutando main
 running = True
@@ -17,6 +18,7 @@ tts_interrupted = False
 recognized_text = None
 def main():
     global context, running, conversation_active, recognized_text, tts_interrupted, app_instance
+    logger.info("Llegó al inicio de main")
     while running:
         recognized_text = None
         if conversation_active & Artemisa.mic_active:
@@ -31,15 +33,19 @@ def main():
             
 
         else:
-            awaked = wake_up.recognize_wake_word()
-            if awaked:
-                #Seleccionar modelo online o local
-                if internet_checker.internet_status:
-                ### ASR en línea ###
-                    recognized_text = transcribe()
-                else:
-                ### ASR local ###
-                    recognized_text = start_asr_local(app_instance) 
+            try:
+                logger.info("A punto de enviar a wake up")
+                awaked = wake_up.recognize_wake_word()
+                if awaked:
+                    #Seleccionar modelo online o local
+                    if internet_checker.internet_status:
+                    ### ASR en línea ###
+                        recognized_text = transcribe()
+                    else:
+                    ### ASR local ###
+                        recognized_text = start_asr_local(app_instance) 
+            except Exception as e:
+                logger.error("Error, seguramente en wake_up.py: %s", e)
 
             
         if  Artemisa.mic_active: #Si el microfono estaba activo al momento de llegar
@@ -108,12 +114,17 @@ def interrupt_tts():
 
 def start_pipeline(starter_app_instance):
     global llm_model, llm_tokenizer, tts_model, app_instance
-    app_instance = starter_app_instance
-    #Inicializar el modelo LLM Flant-T5
-    llm_model, llm_tokenizer = initialize_llm()
-    #Inicializar el modelo TTS 
-    tts_model =local_tts.initialize_tts()
-    main()
+    logger.info("Iniciando la aplicación")
+    try:
+        app_instance = starter_app_instance
+        #Inicializar el modelo LLM Flant-T5
+        llm_model, llm_tokenizer = initialize_llm()
+        #Inicializar el modelo TTS 
+        tts_model =local_tts.initialize_tts()
+        main()
+    except Exception as e:
+        logger.error("Error en algún punto de main: %s", e)
+
 
 
 if __name__ == "__main__":
