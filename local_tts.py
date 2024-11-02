@@ -1,14 +1,15 @@
+import TTS.api
 import sounddevice as sd
 import numpy as np
-from TTS.api import TTS
 import librosa
 
 #Inicializar modelo de Mozilla (css10)
 def initialize_tts():
     #Nombre del modelo que se usará
-    model_name="tts_models/es/mai/tacotron2-DDC"
+    model_path=r"C:\Users\Ernesto\AppData\Local\tts\tts_models--es--mai--tacotron2-DDC\model_file.pth"
+    config_path=r"C:\Users\Ernesto\AppData\Local\tts\tts_models--es--mai--tacotron2-DDC\config.json"
     #Inicializar TTS
-    tts = TTS(model_name=model_name, progress_bar=False)
+    tts = TTS.api.TTS(model_path=model_path, config_path=config_path,progress_bar=False)
     return tts
 
 #Función para generar el audio

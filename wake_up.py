@@ -10,8 +10,8 @@ q = queue.Queue()
 dtype = 'int16'     #Formato de los datos de audio
 access_key = 'NTgoUMMTKQaczZNY4Jm2Gbxr9H67fwuXvco/r0uvTTsIwNtO+8KwRg=='
 
-keyword_paths = ['./Wake_Words/Artemisa_es_windows_v3_0_0.ppn']    #Path hacia las wake words
-model_path = './Wake_Words/porcupine_params_es.pv'
+keyword_paths = [r'C:\Users\Ernesto\Documents\Proyecto ARTEMISA\Wake_Words\Artemisa_es_windows_v3_0_0.ppn']    #Path hacia las wake words
+model_path = r'C:\Users\Ernesto\Documents\Proyecto ARTEMISA\Wake_Words\porcupine_params_es.pv'
 
 #Cargar múltiples wake words predefinidas 
 porcupine = pvporcupine.create(access_key=access_key,

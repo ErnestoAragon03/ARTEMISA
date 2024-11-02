@@ -2,15 +2,13 @@ import sounddevice as sd
 import soundfile as sf
 import vosk
 import json
-import sys  # Importa la librería sys
+import sys 
 import webrtcvad
 import time
 import queue
 from asr_sounds import play_activation_sound, play_deactivation_sound
 import main
-
-#Path hacia la ubicación del modelo Vosk (Modificar más adelante para evitar problemas de compatibilidad)
-model_path = r".\ASR\Local\Model\vosk-model-small-es-0.42"
+import os
 
 #Parámetros del audio
 samplerate = 16000  #Frecuencia de muestreo (Depende del micrófono)
@@ -20,11 +18,14 @@ frame_duration = 30 #ms
 frame_size = int(samplerate * frame_duration /1000)
 
 #Incializar el modelo Vosk
-model = vosk.Model(model_path)
-rec = vosk.KaldiRecognizer(model, samplerate)
+if getattr(sys, 'frozen', False):
+    model_path = os.path.join(os.path.dirname(__file__), 'vosk-model-small-es-0.42')              #Para entorno de producción
+else:
+    #Path hacia la ubicación del modelo Vosk 
+    model_path = r".\ASR\Local\Model\vosk-model-small-es-0.42"      #Para entorno de desarrollo
 
-#Configuración detección de actividad vocal (VAD)
-vad = webrtcvad.Vad(1)  #1 indica modo de detección normal
+model = vosk.Model(model_path)
+
 silence_threshold = 1 # Segundos de inactividad que esperará el modelo
 
 #Iniciar los tiempos de espera
@@ -33,7 +34,7 @@ is_listening = True
 last_detection_time = 0
 detection_cooldown = 0.5    #Umbral para evitar repetir palabras
 
-def start_asr_local(app_instance):
+def start_asr_local():
     global recognized_text
     recognized_text = ""
     #Cola para almacenar los datos de audio

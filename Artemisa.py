@@ -56,10 +56,10 @@ class HomeScreen(tk.Frame):
         self.text_input.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
         self.text_input.bind("<Return>", self.send_text)  #Vincular la tecla Enter para enviar el texto
         ###Cargar Imagenes###
-        self.sendText = tk.PhotoImage(file="Icons/SendText.png")
-        self.micActive = tk.PhotoImage(file="Icons/MicActive.png")
-        self.micMuted = tk.PhotoImage(file="Icons/MicMuted.png")
-        self.ttsSilenced = tk.PhotoImage(file="Icons/SilenceTTS.png")
+        self.sendText = tk.PhotoImage(file=r"C:\Users\Ernesto\Documents\Proyecto ARTEMISA\Icons\SendText.png")
+        self.micActive = tk.PhotoImage(file=r"C:\Users\Ernesto\Documents\Proyecto ARTEMISA\Icons\MicActive.png")
+        self.micMuted = tk.PhotoImage(file=r"C:\Users\Ernesto\Documents\Proyecto ARTEMISA\Icons\MicMuted.png")
+        self.ttsSilenced = tk.PhotoImage(file=r"C:\Users\Ernesto\Documents\Proyecto ARTEMISA\Icons\SilenceTTS.png")
         ###Botón para enviar input de texto###
         send_button = tk.Button(botton_frame, image=self.sendText, command=self.send_text, background=gris_oscuro, foreground=white, highlightbackground=gris_oscuro)
         send_button.grid(row=0, column=1, padx=5, sticky="nsew")
@@ -73,7 +73,7 @@ class HomeScreen(tk.Frame):
         ###Barra de navegación###
         ##Botón para Pantalla de cuenta##
         #Cargar imagen
-        self.account_icon = tk.PhotoImage(file="Icons/Account.png")
+        self.account_icon = tk.PhotoImage(file=r"C:\Users\Ernesto\Documents\Proyecto ARTEMISA\Icons\Account.png")
         account_button = tk.Button(self, image=self.account_icon, command=lambda: controller.show_frame(AccountScreen), background=gris_oscuro, foreground=white, highlightbackground=gris_oscuro)
         account_button.grid(row=3, column=0, pady=40)
 
@@ -150,8 +150,8 @@ class AccountScreen(tk.Frame):
         self.config(bg=azul_marino, highlightbackground=azul_marino)
 
          #Carga de imagenes
-        self.hidden_password = tk.PhotoImage(file="Icons/HiddenPassword.png")
-        self.showed_password = tk.PhotoImage(file="Icons/ShowedPassword.png")
+        self.hidden_password = tk.PhotoImage(file=r"C:\Users\Ernesto\Documents\Proyecto ARTEMISA\Icons\HiddenPassword.png")
+        self.showed_password = tk.PhotoImage(file=r"C:\Users\Ernesto\Documents\Proyecto ARTEMISA\Icons\ShowedPassword.png")
         #Subpantallas de AccountScreen
         self.login_screen = self.init_login_screen()
         self.register_screen = self.init_register_screen()
@@ -200,7 +200,7 @@ class AccountScreen(tk.Frame):
         ### Barra de navegación ###
         ## Botón para Pantalla Principal ##
         #Cargar ícono
-        self.home_icon_login = tk.PhotoImage(file="Icons/Home.png")
+        self.home_icon_login = tk.PhotoImage(file=r"C:\Users\Ernesto\Documents\Proyecto ARTEMISA\Icons\Home.png")
         home_button = tk.Button(frame, image=self.home_icon_login, command=lambda: self.app.show_frame(HomeScreen), foreground=white, background=gris_oscuro, highlightbackground=azul_marino)
         home_button.grid(row=8, column=1, pady=10)
 
@@ -262,7 +262,7 @@ class AccountScreen(tk.Frame):
         ### Barra de navegación ###
         ## Botón para Pantalla Principal ##
         #Cargar ícono
-        self.home_icon_register = tk.PhotoImage(file="Icons/Home.png")
+        self.home_icon_register = tk.PhotoImage(file=r"C:\Users\Ernesto\Documents\Proyecto ARTEMISA\Icons\Home.png")
         home_button = tk.Button(frame, image=self.home_icon_register, command=lambda: self.app.show_frame(HomeScreen), foreground=white, background=gris_oscuro, highlightbackground=azul_marino)
         home_button.grid(row=12, column=1, pady=5)
 
@@ -337,7 +337,7 @@ class AccountScreen(tk.Frame):
         ### Barra de navegación ###
         ## Botón para Pantalla Principal ##
         #Cargar ícono
-        self.home_icon_profile = tk.PhotoImage(file="Icons/Home.png")
+        self.home_icon_profile = tk.PhotoImage(file=r"C:\Users\Ernesto\Documents\Proyecto ARTEMISA\Icons\Home.png")
         home_button = tk.Button(frame, image=self.home_icon_profile, command=lambda: self.app.show_frame(HomeScreen), foreground=white, background=gris_oscuro, highlightbackground=azul_marino)
         home_button.grid(row=11, column=1, pady=5)
 
@@ -563,7 +563,7 @@ class Application(tk.Tk):
         self.geometry("%dx%d" % (width, height))
 
         ###Cargar imagenes###
-        ArtemisaLogo = tk.PhotoImage(file="Icons/ArtemisaLogo.png")
+        ArtemisaLogo = tk.PhotoImage(file=r"C:\Users\Ernesto\Documents\Proyecto ARTEMISA\Icons\ArtemisaLogo.png")
         self.iconphoto(True, ArtemisaLogo)
 
         ###Diccionario para almacenar pantallas (Frames)###

@@ -1,10 +1,10 @@
 from local_asr import start_asr_local                   # Módulo ASR
 from local_llm import initialize_llm, generate_response  # Módulo LLM
-from local_tts import initialize_tts, generate_audio     # Módulo TTS
+import local_tts    # Módulo TTS
 import wake_up  #Módulo de wake words
 import local_db #Módulo de la base de datos local
-import GUI  #Interfaz gráfica
-from GUI import internet_checker #Instancia de verificador de conexión
+import Artemisa  #Interfaz gráfica
+from Artemisa import internet_checker #Instancia de verificador de conexión
 from cloud_llm import ask_to_openai
 from cloud_tts import generate_audio_OpenAI
 from cloud_asr import transcribe
@@ -19,7 +19,7 @@ def main():
     global context, running, conversation_active, recognized_text, tts_interrupted, app_instance
     while running:
         recognized_text = None
-        if conversation_active & GUI.mic_active:
+        if conversation_active & Artemisa.mic_active:
             #Seleccionar modelo online o local
             if internet_checker.internet_status:
             ### ASR en línea ###
@@ -42,7 +42,7 @@ def main():
                     recognized_text = start_asr_local(app_instance) 
 
             
-        if  GUI.mic_active: #Si el microfono estaba activo al momento de llegar
+        if  Artemisa.mic_active: #Si el microfono estaba activo al momento de llegar
             if recognized_text:  #Si se ha detectado texto...
                 ### Pasa el texto capturado a la interfaz gráfica ###
                 app_instance.transcribe_GUI(text=recognized_text, speaker='user')        
@@ -82,7 +82,7 @@ def process_text(recognized_text):
             raise ValueError("La respuesta del LLM está vacía") 
     except ValueError as ve:
         print(f"Error en la respuesta del LLM: {ve}")
-        response = "Hubo un error en la respuesta, intentelo nuevamente"
+        response = "Lo siento, no puedo ayudarte con eso en el modo fuera de línea, vuelve a intentarlo cuando tengas conexión a Internet"
     except Exception as e: 
         print(f"Ocurrió un error inesperado: {e}")
         response = "Hubo un error inesperado, intentelo nuevamente"
@@ -99,7 +99,7 @@ def process_response(llm_response):
         tts_thread.start()
     else:
     ### TTS Local###
-        generate_audio(llm_response, tts_model)
+        local_tts.generate_audio(llm_response, tts_model)
 
 def interrupt_tts():
     global recognized_text, tts_interrupted
@@ -112,7 +112,7 @@ def start_pipeline(starter_app_instance):
     #Inicializar el modelo LLM Flant-T5
     llm_model, llm_tokenizer = initialize_llm()
     #Inicializar el modelo TTS 
-    tts_model = initialize_tts()
+    tts_model =local_tts.initialize_tts()
     main()
 
 
@@ -122,5 +122,5 @@ if __name__ == "__main__":
     #Inicializar el modelo LLM Flant-T5
     llm_model, llm_tokenizer = initialize_llm()
     #Inicializar el modelo TTS 
-    tts_model = initialize_tts()
+    tts_model = local_tts.initialize_tts()
     main()

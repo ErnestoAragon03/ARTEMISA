@@ -34,3 +34,6 @@ LLM/Add-on
 
 .Secret
 
+#Ignorar archivos de producción
+build
+dist
