@@ -221,7 +221,7 @@ def get_personality(email=None):
     
 def changed_personality(email, username):
     judgment_personality = f"Eres una asistente fría, distante, severa, sarcástica y exigente no te gusta perder el tiempo, tienes la personalidad  de Judgment del juego Helltaker, tu nombre es Artemisa, la persona a la que asistes se llama {username}.  Usas las preguntas y respuestas previas para mantener una memoria de la conversación."
-    if get_personality(email) == judgment_personality:
+    if get_personality(email)[0] == judgment_personality:
         return False
     else:
         return True
