@@ -13,17 +13,27 @@ def ask_to_openai(prompt, user, email):
     logger.info("Llegando a cloud_llm")
     try:
         ###Crear personalidad###
+        logger.info("Apunto de crear la personalidad...")
         personalidadActual = get_personality(email)
-        logger.info("Personalidad creada: %s", personalidadActual)
-        personality = {"role": "system",
-                        "content": personalidadActual
-                        }
+        logger.info("Si obtuvo la personalidad: ", personalidadActual)
+        if personalidadActual is not None:
+            logger.info("Personalidad creada: %s", personalidadActual)
+            personality = {"role": "system",
+                            "content": personalidadActual
+                            }
+        else:
+            logger.info("Personalidad no creada ()")
         ###Obtener contexto###
         context = get_context(email, consults_limit=10)
-        ###Añadir la personalidad y la pregunta al contexto (así es más fácil de entregar a la API)###
-        context.insert(0, personality)
-        context.append({"role": "user", "content": prompt})
-        logger.info("Contexto creado: %s", context)
+        if personalidadActual is not None:
+            ###Añadir la personalidad y la pregunta al contexto (así es más fácil de entregar a la API)###
+            context.insert(0, personality)
+            context.append({"role": "user", "content": prompt})
+            logger.info("Contexto creado: %s", context)
+        else: 
+            ###Añadir solo la pregunta al contexto (así es más fácil de entregar a la API)###
+            context.append({"role": "user", "content": prompt})
+            logger.info("Contexto creado: %s", context)
     except Exception as e:
         logger.error("Error creando la personalidad: %s", e)
     try:

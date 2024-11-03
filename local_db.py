@@ -1,4 +1,5 @@
 import sqlite3
+from logger_config import logger
 
 def init_db():
     conn = sqlite3.connect('artemisa_local_db')    #Se contecta o crea la base de datos
@@ -200,13 +201,14 @@ def change_to_default_personality(email, username):
     conn.commit()
     conn.close()
 
-def get_personality(email):
+def get_personality(email=None):
     conn = sqlite3.connect('artemisa_local_db')
     cursor = conn.cursor()
     cursor.execute("SELECT personality FROM local_users WHERE email=(?)", (email,))
     personality = cursor.fetchone()[0]
     conn.close()
-    if personality:
+    logger.info('Personalidad en local_db: %s', personality)
+    if personality is not None:
         return personality
     else:
         judgment_for_guest_personality = f"Eres una asistente fría, distante, severa, sarcástica y exigente no te gusta perder el tiempo, tienes la personalidad  de Judgment del juego Helltaker, tu nombre es Artemisa, no asistes a una persona en concreto, existes para ayudar a quien sea que recurra a tus servicios.  Usas las preguntas y respuestas previas para mantener una memoria de la conversación."
