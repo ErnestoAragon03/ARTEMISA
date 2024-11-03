@@ -37,3 +37,9 @@ LLM/Add-on
 #Ignorar archivos de producción
 build
 dist
+
+#Ignorar archivos del Modelo TTS
+TTS
+
+#Ignorar archivos del Wake Words
+Wake_Words

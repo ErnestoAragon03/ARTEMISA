@@ -47,12 +47,13 @@ def main():
             except Exception as e:
                 logger.error("Error, seguramente en wake_up.py: %s", e)
 
-            
+        logger.info("Salió del ASR")    
         if  Artemisa.mic_active: #Si el microfono estaba activo al momento de llegar
             if recognized_text:  #Si se ha detectado texto...
                 ### Pasa el texto capturado a la interfaz gráfica ###
                 app_instance.transcribe_GUI(text=recognized_text, speaker='user')        
                 ### Enviar a LLM ###
+                logger.info("A punto de emviarlo a process_text")
                 llm_response = process_text(recognized_text)
                 ### Pasar respuesta a interfaz gráfica ###
                 app_instance.transcribe_GUI(text=llm_response, speaker='assistant')
@@ -62,6 +63,7 @@ def main():
                     local_db.insertar_consulta(question=recognized_text, answer=llm_response, email=current_email)
                 recognized_text = None  #Reiniciar despúes de procesar el texto y almacenar en la base de datos
                 #Enviar a TTS
+                logger.info("A punto de enviarlo a process_response")
                 process_response(llm_response)
             else:
                 recognized_text = None
@@ -77,11 +79,17 @@ def process_text(recognized_text):
         ### Seleccionar modelo online o local
         if internet_checker.internet_status:
         ### LLM Online ###
+            logger.info("A punto de enviarlo al LLM ONLINE")
             response = ask_to_openai(recognized_text, app_instance.master.current_user, app_instance.master.current_email)
+            logger.info("Regresó del LLM online, respuesta: %s", response)
         else:
         ### LLM local ###
+            logger.info("A punto de ir a recuperar el contexto")
             contexto = local_db.get_conversations(app_instance.master.current_email)
+            logger.info("Contexto obtenido: %s", contexto)
+            logger.info("A punto de enviarlo al LLM OFFLINE")
             response= generate_response(recognized_text, contexto, llm_model, llm_tokenizer)
+            logger.info("Regresó del LLM local, respuesta: %s", response)
 
         ### Verificar que la respuesta no esté vacía ###
         if not response or response == '[CLS]':

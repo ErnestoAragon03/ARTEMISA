@@ -1,15 +1,26 @@
 from transformers import AutoTokenizer, AutoModelForQuestionAnswering
 import torch
+import os
+from logger_config import logger
 
 #Inicializar el modelo (Flan-T5) y el tokenizer
 def initialize_llm():
-    #Definir el nombre del modelo que se usará
-    model_path = r"C:\Users\Ernesto\.cache\huggingface\hub\models--mrm8488--distill-bert-base-spanish-wwm-cased-finetuned-spa-squad2-es\snapshots\dcadd98e59cd7ce8efd00cb4c61a024e2895b4c1" 
-    #Inicializar tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(model_path, clean_up_tokenization_spaces=True)
-    #Inicializar modelo
-    model = AutoModelForQuestionAnswering.from_pretrained(model_path)
-    return model, tokenizer
+    logger.info("Llegando a local_llm.py")
+    try:
+        #Determina la ruta base, donde está ubicado el script actual
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        logger.info("Base_path: %s", base_path)
+        # Rutas relativas al modelo y archivo de configuración
+        #Definir el nombre del modelo que se usará
+        model_path = os.path.join(base_path, 'LLM', 'Local', 'models--mrm8488--distill-bert-base-spanish-wwm-cased-finetuned-spa-squad2-es')
+        logger.info("Model path: %s", model_path)
+        #Inicializar tokenizer
+        tokenizer = AutoTokenizer.from_pretrained(model_path, clean_up_tokenization_spaces=True)
+        #Inicializar modelo
+        model = AutoModelForQuestionAnswering.from_pretrained(model_path)
+        return model, tokenizer
+    except Exception as e:
+        logger.error("Error en initialize_llm: %s", e)
 
 #Obtener respuesta del modelo
 def generate_response(question, context, model, tokenizer):
