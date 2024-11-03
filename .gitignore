@@ -43,3 +43,6 @@ TTS
 
 #Ignorar archivos del Wake Words
 Wake_Words
+
+#Ignorar la carpeta donde se guarda la versión de producción
+producción

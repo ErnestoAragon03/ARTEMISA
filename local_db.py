@@ -202,10 +202,15 @@ def change_to_default_personality(email, username):
     conn.close()
 
 def get_personality(email=None):
+    logger.info("Llegó a get_personality")
     conn = sqlite3.connect('artemisa_local_db')
+    logger.info("Se conectó a la base de datos")
     cursor = conn.cursor()
+    logger.info("Creó el cursor")
     cursor.execute("SELECT personality FROM local_users WHERE email=(?)", (email,))
-    personality = cursor.fetchone()[0]
+    logger.info("Ejecutó la consulta")
+    personality = cursor.fetchone()
+    logger.info("Realizó el fetchone")
     conn.close()
     logger.info('Personalidad en local_db: %s', personality)
     if personality is not None:
