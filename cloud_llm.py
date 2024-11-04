@@ -16,7 +16,8 @@ def ask_to_openai(prompt, user, email):
         logger.info("Apunto de crear la personalidad...")
         personalidadActual = get_personality(email)
         logger.info("Si obtuvo la personalidad: ", personalidadActual)
-        if personalidadActual is not None:
+        if personalidadActual[0] is not None:
+            personalidadActual = personalidadActual[0]
             logger.info("Personalidad creada: %s", personalidadActual)
             personality = {"role": "system",
                             "content": personalidadActual
@@ -25,7 +26,7 @@ def ask_to_openai(prompt, user, email):
             logger.info("Personalidad no creada ()")
         ###Obtener contexto###
         context = get_context(email, consults_limit=10)
-        if personalidadActual is not None:
+        if personalidadActual[0] is not None:
             ###Añadir la personalidad y la pregunta al contexto (así es más fácil de entregar a la API)###
             context.insert(0, personality)
             context.append({"role": "user", "content": prompt})
