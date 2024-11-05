@@ -46,3 +46,6 @@ Wake_Words
 
 #Ignorar la carpeta donde se guarda la versión de producción
 producción
+
+#Ignorar clave de GCP
+proyecto-artemisa-440806-66693deb2c94.json
