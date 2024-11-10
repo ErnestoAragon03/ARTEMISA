@@ -3,7 +3,6 @@ import subprocess
 import tempfile
 from google.oauth2 import service_account
 from google.cloud import secretmanager
-import signal
 
 ###Variable para almacenar el proceso del proxy###
 proxy_process = None
@@ -24,12 +23,6 @@ def get_sql_credentials():
 ###Inicia el proxy de Cloud SQL y guarda el proceso globalmente
 def start_cloud_proxy():
     global proxy_process
-    ###Obtener las credenciales desde el secret manager###
-    #credentials = get_sql_credentials()
-    ###Crear un archivo temporal para almacenar las credenciales###
-    with tempfile.NamedTemporaryFile(delete=False, mode="w", suffix=".json") as tmp_credentials:
-        tmp_credentials.write(credentials)
-        tmp_credentials_path = tmp_credentials.name
 
     ###Iniciar el proxy de cloud###
     try:
@@ -41,9 +34,6 @@ def start_cloud_proxy():
         print("Proxy de Cloud Iniciado con éxito.")
     except Exception as e:
         print("Error al iniciar el proxy: ",e)
-    finally:
-        ###Limpiar el archivo###
-        os.remove(tmp_credentials_path)
 
 ###Detiene el proxy con la nube usando el PID (Process ID)###
 def stop_cloud_proxy():
@@ -60,4 +50,9 @@ def stop_cloud_proxy():
 
 ###Llamar a la función de iniciar el proxy###
 if __name__ == "__main__":
-    start_cloud_proxy()
+    try:
+        start_cloud_proxy()
+    except Exception as e:
+        print("Error al inicializar el Proxy: ",e)
+    finally:
+        stop_cloud_proxy()

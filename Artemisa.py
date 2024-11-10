@@ -7,6 +7,8 @@ import local_db
 import re
 from check_internet_connection import InternetChecker
 import os
+import proxy
+from clone_db import clone_to_local, clone_to_cloud
 
 mic_active = True
 azul_marino = "#000630"
@@ -617,6 +619,11 @@ class Application(tk.Tk):
         if hasattr(home_screen, 'stop_pipeline'):
             home_screen.stop_pipeline()
 
+        ###Realizar una última copia de la base de datos###
+        clone_to_cloud()
+        ###Detener el proxy###
+        proxy.stop_cloud_proxy()
+
         ### Detener el verificador de conexión ###
         internet_checker.stop_checking()
 
@@ -644,6 +651,13 @@ class Application(tk.Tk):
 if __name__ == "__main__":
     ###Confirmar creación de DB al iniciar la aplicación###
     local_db.init_db()
+    
+    ###Inicializar el Proxy###
+    proxy.start_cloud_proxy()
+
+    ###Obtener datos de la base online###
+    clone_to_cloud()
+
     ###Obtener el nombre de usuario y correo de la última cuenta activa, si es que hay una###
     username, email, voice = local_db.get_last_active_session()
 
