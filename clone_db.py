@@ -11,7 +11,7 @@ if __name__ == "__main__":
         'database': 'Artemisas_long_term_memory',
         'port': 3306,
     }
-    sync_users_to_local(local_db_path, cloud_db_config)
+    sync_users_to_cloud(local_db_path, cloud_db_config)
     try:
         connection = pymysql.connect(**cloud_db_config)
         print("Conexión exitosa a la base de datos en la nube.")

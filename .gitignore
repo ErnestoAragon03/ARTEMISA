@@ -47,5 +47,8 @@ Wake_Words
 #Ignorar la carpeta donde se guarda la versión de producción
 producción
 
-#Ignorar clave de GCP
-GCP_credentials.json
+#Ignorar credenciales
+credentials
+
+#Ignorar el log (sirve para el debugging durante ejecución)
+Artemisa_log.txt
