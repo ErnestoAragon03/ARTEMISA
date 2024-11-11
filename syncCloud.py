@@ -50,7 +50,6 @@ def sync_users_to_local(local_db_path, cloud_db_config):
     
 
 ###Función para sincronizar los usuarios de la DB local con la cloud (se sobreescribirá la cloud)###
-#######REALMENTE ESTA SOLO ME VA A SERVIR PARA EL CLONAR LA BASE LOCAL A LA ONLINE Y DE PRÁCTICA####
 def sync_users_to_cloud(local_db_path, cloud_db_config):
     local_conn = sqlite3.connect(local_db_path)
     local_cursor=local_conn.cursor()

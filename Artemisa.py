@@ -8,7 +8,7 @@ import re
 from check_internet_connection import InternetChecker
 import os
 import proxy
-from clone_db import clone_to_local, clone_to_cloud
+from clone_db import clone_to_local, clone_to_cloud, stop_clone
 
 mic_active = True
 azul_marino = "#000630"
@@ -614,15 +614,18 @@ class Application(tk.Tk):
     ###Función para terminar todos los procesos al cerrar la aplicación###
     def on_closing(self):
         global internet_checker
+        ###Realizar una última copia de la base de datos a la nube###
+        clone_to_cloud()
+        ###Detener el thread encargado de obtener los datos de la nube###
+        stop_clone()
+        clone_to_local_thread.join() #Esperar a que el hilo termine
+        print("Thread consulta periodica terminado.")
+        ###Detener el proxy###
+        proxy.stop_cloud_proxy()
         ### Acceder a HomeScreen desde el diccionario de Frames ###
         home_screen = self.frames[HomeScreen] 
         if hasattr(home_screen, 'stop_pipeline'):
             home_screen.stop_pipeline()
-
-        ###Realizar una última copia de la base de datos###
-        clone_to_cloud()
-        ###Detener el proxy###
-        proxy.stop_cloud_proxy()
 
         ### Detener el verificador de conexión ###
         internet_checker.stop_checking()
@@ -655,9 +658,9 @@ if __name__ == "__main__":
     ###Inicializar el Proxy###
     proxy.start_cloud_proxy()
 
-    ###Obtener datos de la base online###
-    clone_to_cloud()
-
+    ###Crear Thread para obtener datos de la base online###
+    clone_to_local_thread = Thread(target=clone_to_local, args=(30,))
+    clone_to_local_thread.start()
     ###Obtener el nombre de usuario y correo de la última cuenta activa, si es que hay una###
     username, email, voice = local_db.get_last_active_session()
 
