@@ -369,7 +369,7 @@ class AccountScreen(tk.Frame):
         self.profile_screen.grid()
         if local_db.changed_personality(self.app.current_email, self.app.current_user):
             self.personality_entry.delete("1.0", tk.END)
-            self.personality_entry.insert("1.0", local_db.get_personality(self.app.current_email))
+            self.personality_entry.insert("1.0", local_db.get_personality(self.app.current_email)[0])
         else:
             self.personality_entry.delete("1.0", tk.END)
 
@@ -659,7 +659,7 @@ if __name__ == "__main__":
     proxy.start_cloud_proxy()
 
     ###Crear Thread para obtener datos de la base online###
-    clone_to_local_thread = Thread(target=clone_to_local, args=(30,))
+    clone_to_local_thread = Thread(target=clone_to_local, args=(300,))
     clone_to_local_thread.start()
     ###Obtener el nombre de usuario y correo de la última cuenta activa, si es que hay una###
     username, email, voice = local_db.get_last_active_session()

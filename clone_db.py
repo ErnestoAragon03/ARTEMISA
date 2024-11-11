@@ -1,5 +1,5 @@
 import pymysql
-from syncCloud import sync_users_to_cloud, sync_users_to_local
+from online_db import sync_users_to_cloud, sync_users_to_local
 from proxy import get_sql_credentials
 import json
 import threading 
@@ -8,6 +8,7 @@ import threading
 stop_event = threading.Event()
 
 ###Función para clonar el contenido de la base local a la online (Se sobreescribirá la online)###
+###SE USARÁ TAMBIÉN PARA AGREGAR USUARIOS Y EDITARLOS (no es lo más eficiente pero es lo más rápido de implemntar)###
 def clone_to_cloud():
     #Path a la base local
     local_db_path = './artemisa_local_db'

@@ -1,5 +1,8 @@
 import sqlite3
 from logger_config import logger
+from online_db import email_alredy_exists, add_user_online, authenticate_user_online
+from proxy import get_sql_credentials
+import json
 
 def init_db():
     conn = sqlite3.connect('artemisa_local_db')    #Se contecta o crea la base de datos
@@ -84,17 +87,36 @@ def get_answers(email):
 
 
 ###Crear cuenta###
-def add_user(username, email, password):
-    try:
-        conn = sqlite3.connect('artemisa_local_db')
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO local_users (username, email, password, voice, logged) VALUES (?, ?, ?, ?, ?)", (username, email, password, "Nova", True))
-        conn.commit()
-        conn.close()
-        change_to_default_personality(email, username)  #Coloca la personalidad default
-        return True
-    except sqlite3.IntegrityError:      #Ya existe una cuenta con ese correo
+def add_user(username, email, password, voice="Nova", personality=None, NewUser=True):
+    ###Conseguir credenciales de Cloud SQL###
+    #Obtener secreto desde el SecretManager
+    credentials = get_sql_credentials()
+    #Parsear las credenciales desde un JSON a un diccionario
+    cloud_db_config = json.loads(credentials)
+    if email_alredy_exists(email, cloud_db_config) and NewUser:
         return False
+    else:
+        try:
+            ###Insertar en BD local###
+            conn = sqlite3.connect('artemisa_local_db')
+            cursor = conn.cursor()
+            if personality is None:
+                cursor.execute("INSERT INTO local_users (username, email, password, voice, logged) VALUES (?, ?, ?, ?, ?)", (username, email, password, voice, True))
+                conn.commit()
+                print("Guardó el usuario")
+            else:
+                cursor.execute("INSERT INTO local_users (username, email, password, voice, personality,logged) VALUES (?, ?, ?, ?, ?, ?)", (username, email, password, voice, personality, True))
+                conn.commit()
+                print("Guardó el usuario")
+            change_to_default_personality(email, username)  #Coloca la personalidad default
+            if NewUser:
+                ###Insertar en BD online###
+                add_user_online(username, email, password, cloud_db_config)
+                conn.commit()
+            conn.close()
+            return True
+        except sqlite3.IntegrityError:      #Ya existe una cuenta con ese correo
+            return False
 
 def authenticate_user(email, password):
     conn = sqlite3.connect('artemisa_local_db')
@@ -102,7 +124,29 @@ def authenticate_user(email, password):
     cursor.execute("SELECT * FROM local_users WHERE email = ? AND password = ?", (email, password))
     user = cursor.fetchone()
     conn.close()
-    return user is not None
+    if user is not None:
+        return True
+    #Si no está en la base local revisar la online
+    else:
+        ###Conseguir credenciales de Cloud SQL###
+        #Obtener secreto desde el SecretManager
+        credentials = get_sql_credentials()
+        #Parsear las credenciales desde un JSON a un diccionario
+        cloud_db_config = json.loads(credentials)
+        online_user = authenticate_user_online(email, password, cloud_db_config)
+        if online_user is not None:
+            ###Agregar el usuario a la base local###
+            online_email = online_user[0]
+            username = online_user[1]
+            online_password = online_user[2]
+            voice = online_user[3]
+            personality = online_user[4]
+            if add_user(username=username, email=online_email, password=online_password, voice=voice, personality=personality, NewUser=False):
+                return True
+            else:
+                return False
+        else:
+            return False
 
 ###Obtener el correo, username y voice de la última sesión activa###
 def get_last_active_session():

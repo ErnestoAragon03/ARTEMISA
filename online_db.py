@@ -92,3 +92,39 @@ def sync_users_to_cloud(local_db_path, cloud_db_config):
     #Cerrar conexiones
     local_conn.close()
     cloud_conn.close()
+
+###Función para verificar si ya hay un email registrado en la base online###
+def email_alredy_exists(email, cloud_db_config):
+    cloud_conn = pymysql.connect(**cloud_db_config)
+    cloud_cursor = cloud_conn.cursor()
+    cloud_cursor.execute("SELECT * FROM users WHERE email = %s", email)
+    cloud_user = cloud_cursor.fetchone()
+
+    cloud_conn.close()
+
+    if cloud_user:
+        return True
+    else:
+        return False
+    
+###Función para insertar un nuevo usuario en la base online###
+def add_user_online(username, email, password, cloud_db_config):
+    cloud_conn = pymysql.connect(**cloud_db_config)
+    cloud_cursor = cloud_conn.cursor()
+    cloud_cursor.execute("""
+                                    INSERT INTO users (email, username, password, voice)
+                                    VALUES (%s, %s, %s, %s)
+                                     """, (email, username, password, "Nova"))
+
+    cloud_conn.commit()
+    cloud_conn.close()
+
+###Función para autenticar un usuario de la base online, si es que existe###
+def authenticate_user_online(email, password, cloud_db_config):
+    cloud_conn = pymysql.connect(**cloud_db_config)
+    cloud_cursor = cloud_conn.cursor()
+
+    cloud_cursor.execute("SELECT * FROM users WHERE email= %s AND password = %s", (email, password))
+    user = cloud_cursor.fetchone()
+    cloud_conn.close()
+    return user
