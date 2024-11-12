@@ -128,3 +128,30 @@ def authenticate_user_online(email, password, cloud_db_config):
     user = cloud_cursor.fetchone()
     cloud_conn.close()
     return user
+
+###Función para eliminar usuarios de la nube###
+def delete_user_online(email, cloud_db_config):
+    cloud_conn = pymysql.connect(**cloud_db_config)
+    cloud_cursor = cloud_conn.cursor()
+
+    cloud_cursor.execute("DELETE FROM users WHERE email = %s", (email,))
+    cloud_conn.commit()
+    cloud_conn.close()
+
+###Función para cambiar la personalidad
+def change_personality_online(new_personality, email, cloud_db_config):
+    cloud_conn = pymysql.connect(**cloud_db_config)
+    cloud_cursor = cloud_conn.cursor()
+
+    cloud_cursor.execute("UPDATE users SET personality = %s WHERE email = %s", (new_personality, email))
+    cloud_conn.commit()
+    cloud_conn.close()
+
+###Función para cmabiar la voz
+def change_voice(voice, email, cloud_db_config):
+    cloud_conn = pymysql.connect(**cloud_db_config)
+    cloud_cursor = cloud_conn.cursor()
+
+    cloud_cursor.execute("UPDATE users SET voice = %s WHERE email = %s", (voice, email))
+    cloud_conn.commit()
+    cloud_conn.close()

@@ -1,6 +1,6 @@
 import sqlite3
 from logger_config import logger
-from online_db import email_alredy_exists, add_user_online, authenticate_user_online
+import online_db
 from proxy import get_sql_credentials
 import json
 
@@ -93,7 +93,7 @@ def add_user(username, email, password, voice="Nova", personality=None, NewUser=
     credentials = get_sql_credentials()
     #Parsear las credenciales desde un JSON a un diccionario
     cloud_db_config = json.loads(credentials)
-    if email_alredy_exists(email, cloud_db_config) and NewUser:
+    if online_db.email_alredy_exists(email, cloud_db_config) and NewUser:
         return False
     else:
         try:
@@ -111,7 +111,7 @@ def add_user(username, email, password, voice="Nova", personality=None, NewUser=
             change_to_default_personality(email, username)  #Coloca la personalidad default
             if NewUser:
                 ###Insertar en BD online###
-                add_user_online(username, email, password, cloud_db_config)
+                online_db.add_user_online(username, email, password, cloud_db_config)
                 conn.commit()
             conn.close()
             return True
@@ -133,7 +133,7 @@ def authenticate_user(email, password):
         credentials = get_sql_credentials()
         #Parsear las credenciales desde un JSON a un diccionario
         cloud_db_config = json.loads(credentials)
-        online_user = authenticate_user_online(email, password, cloud_db_config)
+        online_user = online_db.authenticate_user_online(email, password, cloud_db_config)
         if online_user is not None:
             ###Agregar el usuario a la base local###
             online_email = online_user[0]
@@ -203,6 +203,13 @@ def change_voice(voice,email):
     cursor.execute("UPDATE local_users SET voice=(?) WHERE email=(?)", (voice, email))
     conn.commit()
     conn.close()
+    ###Cambiar la voz en online
+    ###Conseguir credenciales de Cloud SQL###
+    #Obtener secreto desde el SecretManager
+    #credentials = get_sql_credentials()
+    #Parsear las credenciales desde un JSON a un diccionario
+    #cloud_db_config = json.loads(credentials)
+    #online_db.change_voice(voice, email, cloud_db_config)
 
 #Cerrar cuentas (PERMANENTEMENTE)
 def delete_account(email):
@@ -212,6 +219,14 @@ def delete_account(email):
     conn.commit()
     conn.close()
     delete_consults(email)
+    ###Borrar usuario en la nube
+    ###Conseguir credenciales de Cloud SQL###
+    #Obtener secreto desde el SecretManager
+    credentials = get_sql_credentials()
+    #Parsear las credenciales desde un JSON a un diccionario
+    cloud_db_config = json.loads(credentials)
+    online_db.delete_user_online(email, cloud_db_config)
+
 
 #Borrar las consultas de una cuenta (PERMANENTEMENTE)
 def delete_consults(email):
@@ -230,6 +245,13 @@ def change_personality(email, username, personality):
         cursor.execute("UPDATE local_users SET personality=(?) WHERE email = (?)", (new_personality, email))
         conn.commit()
         conn.close()
+        ###Cambiar personalidad online###
+        ###Conseguir credenciales de Cloud SQL###
+        #Obtener secreto desde el SecretManager
+        credentials = get_sql_credentials()
+        #Parsear las credenciales desde un JSON a un diccionario
+        cloud_db_config = json.loads(credentials)
+        online_db.change_personality_online(new_personality, email, cloud_db_config)
         return True
     except:
         return False
@@ -244,6 +266,13 @@ def change_to_default_personality(email, username):
     cursor.execute("UPDATE local_users SET personality=(?) WHERE email=(?)", (judgment_personality, email))
     conn.commit()
     conn.close()
+    ###Cambiar personalidad online###
+    ###Conseguir credenciales de Cloud SQL###
+    #Obtener secreto desde el SecretManager
+    credentials = get_sql_credentials()
+    #Parsear las credenciales desde un JSON a un diccionario
+    cloud_db_config = json.loads(credentials)
+    online_db.change_personality_online(judgment_personality, email, cloud_db_config)
 
 def get_personality(email=None):
     logger.info("Llegó a get_personality")
