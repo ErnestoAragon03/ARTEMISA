@@ -9,6 +9,7 @@ from check_internet_connection import InternetChecker
 import os
 import proxy
 from clone_db import clone_to_local, clone_to_cloud, stop_clone
+from utils import SHA256_encription
 
 mic_active = True
 azul_marino = "#000630"
@@ -398,9 +399,11 @@ class AccountScreen(tk.Frame):
     def login(self, event=None):
         email = self.email_entry.get()
         password = self.password_entry.get()
+        encryptedPassword = SHA256_encription(password)
         if email == '' or password == '':
             messagebox.showerror("Campos incompletos", "Complete todos los campos porfavor")
-        elif local_db.authenticate_user(email, password):
+        elif local_db.authenticate_user(email, encryptedPassword):
+            print(encryptedPassword)
             username = local_db.get_user(email=email)
             voice = local_db.get_voice(email=email)
             self.app.current_user = username
@@ -420,6 +423,7 @@ class AccountScreen(tk.Frame):
         username = self.register_username_entry.get()
         email = self.register_email_entry.get()
         password = self.register_password_entry.get()
+        encryptedPassword = SHA256_encription(password)
         confirm_password = self.confirm_password_entry.get()
         if username == '' or email == '' or password == '':
             messagebox.showerror("Campos incompletos", "Complete todos los campos porfavor")
@@ -435,7 +439,7 @@ class AccountScreen(tk.Frame):
                                  "- Al menos un caracter especial (@, $, !, %, *, ?, &)")
         elif password != confirm_password:
             messagebox.showerror("Error", "Las contraseñas no coinciden")
-        elif local_db.add_user(username, email, password):
+        elif local_db.add_user(username, email, encryptedPassword):
             messagebox.showinfo("Éxito", "¡Cuenta creada exitosamente!")
             self.app.current_user = username
             self.app.current_email = email
@@ -511,16 +515,18 @@ class AccountScreen(tk.Frame):
         def submit_form():
             email = email_entry.get()
             password = password_entry.get()
+            encryptedPassword = SHA256_encription(password)
+            print(encryptedPassword)
 
             if email and password:
                 if email != self.app.current_email:
                     messagebox.showerror("Email incorrecto", "El email no corresponde con la cuenta actual ¿Está seguro que esta es la cuenta que desea eliminar?")
-                elif local_db.authenticate_user(email, password):
+                elif local_db.authenticate_user(email, encryptedPassword):
                     self.delete_account()
                     messagebox.showinfo("Cuenta Eliminada", "Cuenta eliminada exitosamente")
                     popup.destroy() #Cerrar popup
                 else:
-                    messagebox.showerror("Datos incorrectos", "Correo o contraseña incorrectos")
+                    messagebox.showerror("Datos incorrectos", "Contraseña incorrecta")
             else:
                 messagebox.showerror("Campos incompletos", "Complete todos los campos porfavor")
         #Botón de confirmación
