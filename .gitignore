@@ -52,3 +52,6 @@ credentials
 
 #Ignorar el log (sirve para el debugging durante ejecución)
 Artemisa_log.txt
+
+#Ignorar base de datos local
+artemisa_local_db
