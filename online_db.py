@@ -1,5 +1,6 @@
 import sqlite3
 import pymysql
+from logger_config import logger
 
 ###Función para sincronizar los usuarios de la DB online con la local (se sobreescribirá la local)###
 def sync_users_to_local(local_db_path, cloud_db_config):
@@ -121,13 +122,18 @@ def add_user_online(username, email, password, cloud_db_config):
 
 ###Función para autenticar un usuario de la base online, si es que existe###
 def authenticate_user_online(email, password, cloud_db_config):
-    cloud_conn = pymysql.connect(**cloud_db_config)
-    cloud_cursor = cloud_conn.cursor()
+    logger.info("Llegando a authenticate user online")
+    try:
+        cloud_conn = pymysql.connect(**cloud_db_config)
+        cloud_cursor = cloud_conn.cursor()
 
-    cloud_cursor.execute("SELECT * FROM users WHERE email= %s AND password = %s", (email, password))
-    user = cloud_cursor.fetchone()
-    cloud_conn.close()
-    return user
+        cloud_cursor.execute("SELECT * FROM users WHERE email= %s AND password = %s", (email, password))
+        user = cloud_cursor.fetchone()
+        cloud_conn.close()
+        logger.info("Usuario autenticado con éxito")
+        return user
+    except Exception as e:
+        logger.error("Error al autenticar usuario: %s", e)
 
 ###Función para eliminar usuarios de la nube###
 def delete_user_online(email, cloud_db_config):
