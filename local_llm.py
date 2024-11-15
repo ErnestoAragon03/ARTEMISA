@@ -12,7 +12,7 @@ def initialize_llm():
         logger.info("Base_path: %s", base_path)
         # Rutas relativas al modelo y archivo de configuración
         #Definir el nombre del modelo que se usará
-        model_path = os.path.join(base_path, 'LLM', 'Local', 'models--mrm8488--distill-bert-base-spanish-wwm-cased-finetuned-spa-squad2-es')
+        model_path = os.path.join(base_path, 'LLM', 'Local', 'models--mrm8488--distill-bert-base-spanish-wwm-cased-finetuned-spa-squad2-es', 'snapshots', 'dcadd98e59cd7ce8efd00cb4c61a024e2895b4c1')  #EN PRODUCCIÓN QUITAR DESDE SNAPSHOTS
         logger.info("Model path: %s", model_path)
         #Inicializar tokenizer
         tokenizer = AutoTokenizer.from_pretrained(model_path, clean_up_tokenization_spaces=True)

@@ -19,6 +19,7 @@ recognized_text = None
 def main():
     global context, running, conversation_active, recognized_text, tts_interrupted, app_instance
     logger.info("Llegó al inicio de main")
+    print("Llegó al inicio de main")
     while running:
         recognized_text = None
         if conversation_active & Artemisa.mic_active:
@@ -35,6 +36,7 @@ def main():
         else:
             try:
                 logger.info("A punto de enviar a wake up")
+                print("A punto de enviar a wake up")
                 awaked = wake_up.recognize_wake_word()
                 if awaked:
                     #Seleccionar modelo online o local
@@ -122,6 +124,7 @@ def interrupt_tts():
 
 def start_pipeline(starter_app_instance):
     global llm_model, llm_tokenizer, tts_model, app_instance
+    print("Iniciando Pipeline")
     logger.info("Iniciando la aplicación")
     try:
         app_instance = starter_app_instance

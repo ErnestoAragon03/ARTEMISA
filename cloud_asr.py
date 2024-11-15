@@ -13,10 +13,11 @@ import cloud_tts
 import os
 from logger_config import logger
 from asr_sounds import play_activation_sound, play_deactivation_sound
+from proxy import get_OpenAI_Key
 
 client = OpenAI(
     #Configurar API key de OpenAI
-    api_key = "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"
+    api_key = get_OpenAI_Key()
 )
 
 samplerate = 16000          #Frecuencia de muestreo (Hz)

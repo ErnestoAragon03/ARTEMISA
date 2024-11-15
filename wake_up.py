@@ -31,6 +31,7 @@ def constant_callback(indata,frames,time,status):
 def recognize_wake_word():
     try:
         logger.info("Llegando a wake_up-py")
+        print("Llegando a wake up")
         with sd.InputStream(callback=constant_callback, channels=1, samplerate=porcupine.sample_rate, blocksize=porcupine.frame_length, dtype=dtype):
             logger.info("Esperando Wake Word...")
             print("Listening...")
@@ -47,3 +48,4 @@ def recognize_wake_word():
             return False
     except Exception as e:
         logger.error("Error en wake_up.py: %s", e)
+        print("Error en wake_up.py: ", e)
