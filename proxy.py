@@ -7,6 +7,7 @@ from google.cloud import storage
 from logger_config import logger
 import sys
 import json
+from utils import get_desktop_path
 
 ###Variable para almacenar el proceso del proxy###
 proxy_process = None
@@ -171,10 +172,65 @@ def upload_audio_to_cloud(audio_file_path):
     except Exception as e:
         print("Ocurrió un error mientras se subía el audio: ", e)
 
+###Descarga todos los archivos de audio del usuario actual###
+def download_user_audios(user_email):
+    bucket_name = "audios_generados"
+    try:
+        ###Recuperar credenciales desde Secret Manager###
+        storage_credentials_json = get_storage_credentials()
+
+        if storage_credentials_json:
+            # Decodificar el JSON en un diccionario
+            storage_credentials = json.loads(storage_credentials_json)
+            
+            # Crear credenciales a partir del diccionario decodificado
+            credentials = service_account.Credentials.from_service_account_info(storage_credentials)
+            
+            # Crear el cliente de Google Cloud Storage con las credenciales cargadas
+            storage_client = storage.Client(credentials=credentials)
+            
+            # Obtener el bucket donde de donde se descargarán los archivos
+            bucket = storage_client.bucket(bucket_name)
+            
+            # Prefijo que corresponde al usuario actual
+            prefix = f"{user_email}"
+
+            ###Obtener ruta del escritorio del usuario
+            desktop_path = get_desktop_path()
+            download_folder = os.path.join(desktop_path, 'audios_descargados')
+
+             # Crear la carpeta de descarga si no existe
+            if not os.path.exists(download_folder):
+                os.makedirs(download_folder)
+            
+            ###Listar todos los blobs (archivos) que comienzan con el prefijo del usuario
+            blobs = bucket.list_blobs(prefix=prefix)
+            print(blobs)
+
+            ###Descargar cada archivo en la carpeta especificada
+            for blob in blobs:
+                print("Entró al for")
+                # Ruta completa del archivo local
+                local_file_path = os.path.join(download_folder, blob.name)
+                
+                # Crear directorios necesarios si no existen
+                os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
+                
+                # Descargar el archivo
+                blob.download_to_filename(local_file_path)
+                
+                logger.info(f"Archivo descargado exitosamente: {blob.name} a {local_file_path}")
+        else:
+            print("Error al recuperar las credenciales")
+            logger.error("Error al recuperar las credenciales")
+    except Exception as e:
+        print("Ocurrió un error mientras se descargaban los audios: ", e)
+
 ###Llamar a la función de iniciar el proxy###
 if __name__ == "__main__":
     try:
         start_cloud_proxy()
+        download_user_audios("ernesto.aragon888@gmail.com")
     except Exception as e:
         print("Error al inicializar el Proxy: ",e)
     finally:
