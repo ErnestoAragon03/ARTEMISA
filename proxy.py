@@ -220,6 +220,7 @@ def download_user_audios(user_email):
                 blob.download_to_filename(local_file_path)
                 
                 logger.info(f"Archivo descargado exitosamente: {blob.name} a {local_file_path}")
+                print(f"Archivo descargado exitosamente: {blob.name} a {local_file_path}")
         else:
             print("Error al recuperar las credenciales")
             logger.error("Error al recuperar las credenciales")
