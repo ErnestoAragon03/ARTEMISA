@@ -2,10 +2,11 @@ from openai import OpenAI
 from local_db import get_context
 from local_db import get_personality
 from logger_config import logger
+from proxy import get_OpenAI_Key
 
 client = OpenAI(
     #organization= 'org-BLKMXfWSb6Ytc2bIO4tIJ6EM',
-    api_key = "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"
+    api_key = get_OpenAI_Key()
 
 )
 

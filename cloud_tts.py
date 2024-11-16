@@ -2,10 +2,14 @@ from openai import OpenAI
 import sounddevice as sd
 import numpy as np
 import main
+import tempfile
+from proxy import upload_audio_to_cloud, get_OpenAI_Key
+import wave
+import os
 
 client = OpenAI(
     #Configurar API key de OpenAI
-    api_key = "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"
+    api_key = get_OpenAI_Key()
 )
 
 is_tts_playing=False
@@ -36,5 +40,23 @@ def generate_audio_OpenAI(input_text, app):
                 break
             block = audio_array[i:i + 1024]
             stream.write(block)  # Escribe el bloque en el stream
+
+    ### Obtener el correo del usuario actual###
+    user_email = app.master.current_email
+    ###Crear un archivo temporal para guardar el audio###
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.wav', prefix=f"{user_email}") as temp_wav_file:
+        temp_wav_path = temp_wav_file.name
+
+        #Guardar en formato Wav
+        with wave.open(temp_wav_file, 'wb') as wav_file:
+            wav_file.setnchannels(1)  # Mono
+            wav_file.setsampwidth(2)  # 16-bit audio
+            wav_file.setframerate(24000)  # 24 kHz sample rate
+            wav_file.writeframes((audio_array * 32767).astype(np.int16).tobytes())  # Escribir el audio PCM
+
+            print(f"Audio guardado en: {temp_wav_path}")
+    ###Llamar función para subir el archivo al bucket
+    upload_audio_to_cloud(temp_wav_path)
+
     is_tts_playing = False
     main.tts_interrupted = False

@@ -66,6 +66,7 @@ class HomeScreen(tk.Frame):
         self.micActive = tk.PhotoImage(file=os.path.join(base_path, 'Icons', 'MicActive.png'))
         self.micMuted = tk.PhotoImage(file=os.path.join(base_path, 'Icons', 'MicMuted.png'))
         self.ttsSilenced = tk.PhotoImage(file=os.path.join(base_path, 'Icons', 'SilenceTTS.png'))
+        self.download = tk.PhotoImage(file=os.path.join(base_path, 'Icons', 'Download.png'))
         ###Botón para enviar input de texto###
         send_button = tk.Button(botton_frame, image=self.sendText, command=self.send_text, background=gris_oscuro, foreground=white, highlightbackground=gris_oscuro)
         send_button.grid(row=0, column=1, padx=5, sticky="nsew")
@@ -75,6 +76,9 @@ class HomeScreen(tk.Frame):
         ###Botón ASR###
         self.mic_button = tk.Button(botton_frame, image=self.micActive, command= self.toggle_mic, background=gris_oscuro, foreground=white, highlightbackground=gris_oscuro)
         self.mic_button.grid(row=0, column=3, padx=5, sticky="nsew")
+        ###Botón para descargar audios###
+        self.download_button = tk.Button(botton_frame, image=self.download, command=self.download_audios, background=gris_oscuro, foreground=white, highlightbackground=gris_oscuro)
+        self.download_button.grid(row=0, column=4, padx=5, sticky="nsew")
 
         ###Barra de navegación###
         ##Botón para Pantalla de cuenta##
@@ -132,6 +136,10 @@ class HomeScreen(tk.Frame):
             self.mic_button.config(image=self.micActive)
             self.start_pipeline()
     
+    ###Función para descargar todos los audios generados por el TTS hasta el momento###
+    def download_audios(self):
+        proxy.download_user_audios(app.current_email)
+
     ###Función de Transcripción###
     def transcribe_GUI(self, text, speaker):
         self.transcription_area.config(state=tk.NORMAL) #Habilita la edición del text Widget
@@ -665,7 +673,7 @@ if __name__ == "__main__":
     proxy.start_cloud_proxy()
 
     ###Crear Thread para obtener datos de la base online###
-    clone_to_local_thread = Thread(target=clone_to_local, args=(300,))
+    clone_to_local_thread = Thread(target=clone_to_local, args=(600,))
     clone_to_local_thread.start()
     ###Obtener el nombre de usuario y correo de la última cuenta activa, si es que hay una###
     username, email, voice = local_db.get_last_active_session()
